@@ -1,4 +1,18 @@
 # Php Form Package
+## Installation via Composer (not yet)
+```json
+{
+	"require": {
+		"mvanvu/php-form": "~1.0"
+	}
+}
+```
+
+Alternatively, from the command line:
+
+```sh
+composer require mvanvu/php-form
+```
 ## Usage
 
 ``` php
