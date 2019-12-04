@@ -219,7 +219,7 @@ class Form
 			if (!$field->isValid())
 			{
 				$isValid        = false;
-				$this->messages = array_merge($field->get('errorMessages', []));
+				$this->messages = array_merge($this->messages, $field->get('errorMessages', []));
 			}
 		}
 
