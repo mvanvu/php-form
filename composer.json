@@ -1,25 +1,29 @@
 {
-    "name": "mvanvu/php-form",
-    "type": "php",
-    "description": "Php Form package",
-    "keywords": ["php", "registry"],
-    "homepage": "https://github.com/mvanvu/php-form",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Mai Vu",
-            "email": "maivubc@gmail.com",
-            "role": "Developer"
-        }
-    ],    
-    "require": {
-         "php": ">=5.4.0",
-        "mvanvu/php-registry": "~1.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "MaiVu\\Php\\Form\\": "src/"
-        }
-    },
-    "minimum-stability": "dev"
+  "name": "mvanvu/php-form",
+  "type": "php",
+  "description": "Php Form package",
+  "keywords": [
+    "php",
+    "registry"
+  ],
+  "homepage": "https://github.com/mvanvu/php-form",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Mai Vu",
+      "email": "maivubc@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "mvanvu/php-registry": "~1.0",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "MaiVu\\Php\\Form\\": "src/"
+    }
+  },
+  "minimum-stability": "dev"
 }

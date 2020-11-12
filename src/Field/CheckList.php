@@ -4,7 +4,7 @@ namespace MaiVu\Php\Form\Field;
 
 use MaiVu\Php\Form\Field\Base\CheckBase;
 
-class Radio extends CheckBase
+class CheckList extends CheckBase
 {
-	protected $checkType = 'radio';
+
 }

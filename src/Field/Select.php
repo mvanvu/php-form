@@ -2,9 +2,10 @@
 
 namespace MaiVu\Php\Form\Field;
 
+use MaiVu\Php\Form\Field\Base\OptionsBase;
 use MaiVu\Php\Registry;
 
-class Select extends OptionAbstract
+class Select extends OptionsBase
 {
 	/** @var array */
 	protected $options = [];
@@ -12,30 +13,9 @@ class Select extends OptionAbstract
 	/** @var boolean */
 	protected $multiple = false;
 
-	public function getValue()
-	{
-		$value = parent::getValue();
-
-		if ($this->multiple
-			&& !is_array($value)
-		)
-		{
-			$value = Registry::parseData($value);
-		}
-
-		return $value;
-	}
-
-	public function setOptions($options)
-	{
-		$this->options = Registry::parseData($options);
-
-		return $this;
-	}
-
 	public function toString()
 	{
-		$input = '<select' . ($this->class ? 'class="' . $this->class . '"' : '')
+		$input = '<select' . ($this->class ? ' class="' . $this->class . '"' : '')
 			. ' name="' . $this->getName() . ($this->multiple ? '[]' : '') . '" id="' . $this->getId() . '"'
 			. $this->getDataAttributesString();
 
@@ -49,6 +29,11 @@ class Select extends OptionAbstract
 			$input .= ' readonly';
 		}
 
+		if ($this->disabled)
+		{
+			$input .= ' disabled';
+		}
+
 		if ($this->multiple)
 		{
 			$input .= ' multiple';
@@ -58,27 +43,42 @@ class Select extends OptionAbstract
 		$value      = $this->getValue();
 		$valueArray = is_array($value) ? $value : [$value];
 
-		foreach ($this->getOptions() as $optKey => $optValue)
+		foreach ($this->getOptions() as $options)
 		{
-			if (is_array($optValue))
+			if (isset($options['optgroup']))
 			{
-				$input .= '<optgroup label="' . $this->renderValue($optKey) . '">';
+				$input .= '<optgroup label="' . $this->renderValue($options['label'] ?? 'No Label') . '">';
 
-				foreach ($optValue as $k => $v)
+				foreach ($options['optgroup'] as $opt)
 				{
-					$selected = in_array((string) $k, $valueArray) ? ' selected' : '';
-					$input    .= '<option value="' . $this->renderValue($k) . '"' . $selected . '>' . $this->renderText($v) . '</option>';
+					$optValue = (string) ($opt['value'] ?? '');
+					$optText  = (string) ($opt['text'] ?? '');
+					$selected = in_array($optValue, $valueArray) ? ' selected' : '';
+					$input    .= '<option value="' . $this->renderValue($optValue) . '"' . $selected . '>' . $this->renderText($optText) . '</option>';
 				}
 
 				$input .= '</optgroup>';
 			}
 			else
 			{
-				$selected = in_array((string) $optKey, $valueArray) ? ' selected' : '';
-				$input    .= '<option value="' . $this->renderValue($optKey) . '"' . $selected . '>' . $this->renderText($optValue) . '</option>';
+				$optValue = (string) ($options['value'] ?? '');
+				$selected = in_array($optValue, $valueArray) ? ' selected' : '';
+				$input    .= '<option value="' . $this->renderValue($optValue) . '"' . $selected . '>' . $this->renderText($optValue) . '</option>';
 			}
 		}
 
 		return $input . '</select>';
+	}
+
+	public function getValue()
+	{
+		$value = parent::getValue();
+
+		if ($this->multiple && !is_array($value))
+		{
+			$value = Registry::parseData($value);
+		}
+
+		return $value;
 	}
 }

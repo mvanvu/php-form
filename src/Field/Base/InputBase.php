@@ -1,10 +1,10 @@
 <?php
 
-namespace MaiVu\Php\Form\Field;
+namespace MaiVu\Php\Form\Field\Base;
 
 use MaiVu\Php\Form\Field;
 
-class InputAbstract extends Field
+class InputBase extends Field
 {
 	/** @var string */
 	protected $inputType = 'text';
@@ -15,10 +15,9 @@ class InputAbstract extends Field
 	/** @var string */
 	protected $autocomplete = null;
 
-
 	public function toString()
 	{
-		$value = $this->getValue();
+		$value = $this->value;
 
 		if (is_array($value) || is_object($value))
 		{
@@ -40,9 +39,14 @@ class InputAbstract extends Field
 			$input .= ' readonly';
 		}
 
+		if ($this->disabled)
+		{
+			$input .= ' disabled';
+		}
+
 		if ($this->hint)
 		{
-			$input .= ' placeholder="' . htmlspecialchars($this->hint, ENT_COMPAT, 'UTF-8') . '"';
+			$input .= ' placeholder="' . htmlspecialchars($this->_($this->hint), ENT_COMPAT, 'UTF-8') . '"';
 		}
 
 		if ($this->autocomplete)

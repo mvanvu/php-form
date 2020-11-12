@@ -3,10 +3,11 @@
 namespace MaiVu\Php\Form\Rule;
 
 use MaiVu\Php\Form\Field;
+use MaiVu\Php\Form\Rule;
 
 class Options implements Rule
 {
-	public function validate(Field $field)
+	public function validate(Field $field): bool
 	{
 		$value    = $field->getValue();
 		$required = $field->get('required', false);
@@ -19,18 +20,18 @@ class Options implements Rule
 
 		$optionValues = [];
 
-		foreach ($options as $optKey => $optValue)
+		foreach ($options as $option)
 		{
-			if (is_array($optValue))
+			if (isset($option['optgroup']))
 			{
-				foreach ($optValue as $k => $v)
+				foreach ($option['optgroup'] as $opt)
 				{
-					$optionValues[] = $k;
+					$optionValues[] = $opt['value'] ?? null;
 				}
 			}
 			else
 			{
-				$optionValues[] = $optKey;
+				$optionValues[] = $option['value'] ?? null;
 			}
 		}
 

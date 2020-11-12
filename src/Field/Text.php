@@ -2,7 +2,9 @@
 
 namespace MaiVu\Php\Form\Field;
 
-class Text extends InputAbstract
+use MaiVu\Php\Form\Field\Base\InputBase;
+
+class Text extends InputBase
 {
 
 }

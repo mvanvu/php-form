@@ -2,73 +2,65 @@
 
 namespace MaiVu\Php\Form;
 
+use Closure;
 use MaiVu\Php\Filter;
 use MaiVu\Php\Registry;
-use MaiVu\Php\Form\Rule\Rule;
 
 abstract class Field
 {
-	/** @var Form */
 	protected $form = null;
 
-	/** @var string */
 	protected $group = null;
 
-	/** @var string */
 	protected $type = '';
 
-	/** @var string */
 	protected $name = '';
 
-	/** @var string */
 	protected $renderName = null;
 
-	/** @var string */
 	protected $label = '';
 
-	/** @var string */
 	protected $description = '';
 
-	/** @var string */
 	protected $class = '';
 
-	/** @var string */
-	protected $labelClass = '';
-
-	/** @var string */
 	protected $id = '';
 
-	/** @var boolean */
 	protected $required = false;
 
-	/** @var boolean */
 	protected $readonly = false;
 
-	/** @var array */
+	protected $disabled = false;
+
 	protected $dataAttributes = [];
 
-	/** @var array */
 	protected $filters = [];
 
-	/** @var array */
 	protected $rules = [];
 
-	/** @var array */
 	protected $messages = [];
 
-	/** @var array */
 	protected $errorMessages = [];
 
-	/** @var mixed */
+	protected $showOn = '';
+
 	protected $value = null;
 
-	/** @var string | null */
 	protected $confirmField = null;
 
-	/** @var string | null */
 	protected $regex = null;
 
-	abstract public function toString();
+	protected $translate = false;
+
+	protected $ucmFieldId = 0;
+
+	protected $language = '*';
+
+	protected $translationsData = [];
+
+	protected $input = '';
+
+	protected $renderTemplate = null;
 
 	public function __construct($config, Form $form = null)
 	{
@@ -82,7 +74,7 @@ abstract class Field
 
 	public function load($config)
 	{
-		$config = Registry::parseData($config);
+		$config = (new Registry($config))->toArray();
 
 		foreach ($config as $k => $v)
 		{
@@ -90,18 +82,6 @@ abstract class Field
 		}
 
 		return $this;
-	}
-
-	public function setForm(Form $form)
-	{
-		$this->form = $form;
-
-		return $this;
-	}
-
-	public function getForm()
-	{
-		return $this->form;
 	}
 
 	public function set($attribute, $value)
@@ -123,21 +103,75 @@ abstract class Field
 		return $this;
 	}
 
-	public function get($attribute, $defaultValue = null)
+	public function setTranslate($value)
 	{
-		if (property_exists($this, $attribute))
-		{
-			$method = 'get' . ucfirst($attribute);
+		$this->translate = boolval($value);
 
-			if (method_exists($this, $method))
+		return $this;
+	}
+
+	public function setLanguage($languageCode)
+	{
+		$this->language = $languageCode;
+
+		return $this;
+	}
+
+	public function getRules()
+	{
+		return $this->rules;
+	}
+
+	public function setRules(array $rules)
+	{
+		$this->rules = [];
+		$formOptions = Form::getOptions();
+
+		foreach ($rules as $rule)
+		{
+			$ruleClass = null;
+
+			if (false === strpos($rule, '\\'))
 			{
-				return $this->{$method}($attribute);
+				foreach ($formOptions['ruleNamespaces'] as $namespace)
+				{
+					if (class_exists($namespace . '\\' . $rule))
+					{
+						$ruleClass = $namespace . '\\' . $rule;
+						break;
+					}
+				}
+			}
+			elseif (class_exists($rule))
+			{
+				$ruleClass = $rule;
 			}
 
-			return $this->{$attribute};
+			if ($ruleClass)
+			{
+				$ruleObj = new $ruleClass;
+
+				if ($ruleObj instanceof Rule)
+				{
+					$this->rules[$rule] = $ruleObj;
+				}
+			}
+		}
+	}
+
+	public function applyFilters($value = null, $forceNull = false)
+	{
+		if (null === $value && !$forceNull)
+		{
+			// Default value
+			$value = $this->getValue();
 		}
 
-		return $defaultValue;
+		// Update value
+		$this->setValue($this->cleanValue($value));
+
+		// Always use $this->getValue() callback to get the value of this field
+		return $this->getValue();
 	}
 
 	public function getValue()
@@ -150,6 +184,148 @@ abstract class Field
 		$this->value = $value;
 
 		return $this;
+	}
+
+	public function cleanValue($value)
+	{
+		if ($filters = $this->getFilters())
+		{
+			$value = Filter::clean($value, $filters);
+		}
+
+		return $value;
+	}
+
+	public function getFilters()
+	{
+		return $this->filters;
+	}
+
+	public function setFilters(array $filters)
+	{
+		$this->filters = $filters;
+
+		return $this;
+	}
+
+	public function isValid()
+	{
+		$defaultMessages     = Form::getOptions()['messages'];
+		$value               = $this->getValue();
+		$isValid             = true;
+		$this->errorMessages = [];
+		$placeHolders        = [
+			'field' => $this->_($this->label ?: $this->name),
+		];
+
+		if ($this->required && ($value != '0' && empty($value)))
+		{
+			$isValid = false;
+
+			if (isset($this->messages['requireMessage']))
+			{
+				$this->errorMessages[] = $this->_($this->messages['requireMessage'], $placeHolders);
+			}
+			else
+			{
+				$this->errorMessages[] = $this->_($defaultMessages['required'], $placeHolders);
+			}
+		}
+
+		if (count($this->rules))
+		{
+			/** @var Rule $ruleHandler */
+
+			foreach ($this->rules as $ruleName => $ruleHandler)
+			{
+				if (!$ruleHandler->validate($this))
+				{
+					$isValid = false;
+
+					if (isset($this->messages[$ruleName]))
+					{
+						$this->errorMessages[] = $this->_($this->messages[$ruleName], $placeHolders);
+					}
+					else
+					{
+						$this->errorMessages[] = $this->_($defaultMessages['invalid'], $placeHolders);
+					}
+				}
+			}
+		}
+
+		return $isValid;
+	}
+
+	public function _(string $text, array $placeHolders = [])
+	{
+		$renderer = Form::getFieldTranslator();
+
+		if ($renderer instanceof Closure)
+		{
+			return call_user_func_array($renderer, [$text, $placeHolders]);
+		}
+
+		if ($placeHolders)
+		{
+			foreach ($placeHolders as $name => $value)
+			{
+				$text = str_replace('%' . $name . '%', $value, $text);
+			}
+		}
+
+		return $text;
+	}
+
+	public function render($options = [])
+	{
+		static $paths = [];
+		$options  = Form::getOptions($options);
+		$template = $options['template'];
+		if (!isset($paths[$template]))
+		{
+			// Default template is Bootstrap v4
+			$paths[$template] = __DIR__ . '/tmpl/bootstrap';
+
+			foreach ($options['templatePaths'] as $path)
+			{
+				$path .= '/' . $template . '/renderField.php';
+
+				if (is_file($path))
+				{
+					$paths[$template] = $path;
+					break;
+				}
+			}
+		}
+
+		$this->renderTemplate = $paths[$template];
+		$this->input          = $this->toString();
+
+
+		return $this->loadTemplate(
+			$this->renderTemplate,
+			[
+				'id'          => $this->getId(),
+				'label'       => trim($this->getLabel()),
+				'description' => trim($this->getDescription()),
+				'errors'      => $this->getErrorMessages(),
+				'horizontal'  => $options['layout'] === 'horizontal',
+				'showOn'      => $this->getShowOn(),
+				'class'       => 'field-' . $this->getType(),
+				'required'    => $this->get('required'),
+			]
+		);
+	}
+
+	abstract public function toString();
+
+	protected function loadTemplate($path, array $displayData = [])
+	{
+		ob_start();
+		include $path;
+
+		return ob_get_clean();
 	}
 
 	public function getId()
@@ -187,139 +363,191 @@ abstract class Field
 		return $this;
 	}
 
-	public function setRules(array $rules)
-	{
-		$this->rules = [];
-
-		foreach ($rules as $rule)
-		{
-			$ruleClass = 'MaiVu\\Php\\Form\\Rule\\' . $rule;
-
-			if (class_exists($ruleClass))
-			{
-				$this->rules[$rule] = new $ruleClass;
-			}
-		}
-
-		return $this;
-	}
-
-	public function getRules()
-	{
-		return $this->rules;
-	}
-
-	public function setFilters(array $filters)
-	{
-		$this->filters = $filters;
-
-		return $this;
-	}
-
-	public function getFilters()
-	{
-		return $this->filters;
-	}
-
-	public function cleanValue($value)
-	{
-		$filters = $this->getFilters();
-
-		if (!empty($value) && count($filters))
-		{
-			$value = Filter::clean($value, $filters);
-		}
-
-		return $value;
-	}
-
-	public function applyFilters($value = null)
-	{
-		if (null === $value)
-		{
-			$value = $this->getValue();
-		}
-
-		// Update value
-		$this->setValue($this->cleanValue($value));
-
-		return $value;
-	}
-
 	public function getLabel()
 	{
-		return $this->label ?: $this->name;
+		return $this->label;
 	}
 
-	protected function renderMessage($message, $placeHolders = null)
+	public function getDescription()
 	{
-		$keysMaps = [
-			'required-field-msg'      => 'The %field% is required',
-			'invalid-field-value-msg' => 'The value of %field% is invalid',
-		];
-
-		if (isset($keysMaps[$message]))
-		{
-			$message = $keysMaps[$message];
-		}
-
-		if (is_array($placeHolders))
-		{
-			foreach ($placeHolders as $key => $value)
-			{
-				$message = str_replace('%' . $key . '%', $value, $message);
-			}
-		}
-
-		return $message;
+		return $this->description;
 	}
 
-	public function isValid()
+	public function getErrorMessages()
 	{
-		$isValid             = true;
-		$this->errorMessages = [];
-		$value               = $this->getValue();
-		$placeHolders        = [
-			'field' => $this->getLabel(),
-		];
+		return $this->errorMessages;
+	}
 
-		if ($this->required && ($value != '0' && empty($value)))
+	public function getShowOn()
+	{
+		$showOnData = [];
+
+		if (empty($this->showOn))
 		{
-			$isValid = false;
-
-			if (isset($this->messages['requireMessage']))
-			{
-				$this->errorMessages[] = $this->renderMessage($this->messages['requireMessage'], $placeHolders);
-			}
-			else
-			{
-				$this->errorMessages[] = $this->renderMessage('required-field-msg', $placeHolders);
-			}
+			return $showOnData;
 		}
 
-		if (count($this->rules))
-		{
-			/** @var Rule $ruleHandler */
+		$formName    = $this->form->getName();
+		$showOnParts = preg_split('/(\||\&)/', $this->showOn, -1, PREG_SPLIT_DELIM_CAPTURE);
+		$op          = '';
 
-			foreach ($this->rules as $ruleName => $ruleHandler)
+		foreach ($showOnParts as $showOnPart)
+		{
+			if ('|' === $showOnPart || '&' === $showOnPart)
 			{
-				if (!$ruleHandler->validate($this))
+				$op = $showOnPart;
+				continue;
+			}
+
+			list ($fieldName, $value) = explode(':', $showOnPart, 2);
+
+			if ($this->form)
+			{
+				if (false === strpos($fieldName, '.'))
 				{
-					$isValid = false;
+					$fieldName = $this->form->getRenderFieldName($fieldName);
+				}
+				else
+				{
+					$parts       = explode('.', $fieldName);
+					$fieldName   = array_pop($parts);
+					$tmpFormName = implode('.', $parts);
 
-					if (isset($this->messages[$ruleName]))
+					if ($tmpFormName === $formName)
 					{
-						$this->errorMessages[] = $this->renderMessage($this->messages[$ruleName], $placeHolders);
+						$fieldName = $this->form->getRenderFieldName($fieldName);
 					}
 					else
 					{
-						$this->errorMessages[] = $this->renderMessage('invalid-field-value-msg', $placeHolders);
+						$tmpForm   = new Form($tmpFormName);
+						$fieldName = $tmpForm->getRenderFieldName($fieldName);
+						unset($tmpForm);
 					}
 				}
 			}
+
+			$showOnData[] = [
+				'op'    => $op,
+				'field' => $fieldName,
+				'value' => $value,
+			];
+
+			if ('' !== $op)
+			{
+				$op = '';
+			}
 		}
 
-		return $isValid;
+		return $showOnData;
+	}
+
+	public function setShowOn($showOnData)
+	{
+		$this->showOn = str_replace(' & ', '&', trim($showOnData));
+		$this->showOn = str_replace(' | ', '|', $this->showOn);
+		$this->showOn = str_replace(' : ', ':', $this->showOn);
+
+		return $this;
+	}
+
+	public function getType()
+	{
+		return $this->type;
+	}
+
+	public function setType($type)
+	{
+		$this->type = ucfirst($type);
+
+		return $this;
+	}
+
+	public function get($attribute, $defaultValue = null)
+	{
+		if (property_exists($this, $attribute))
+		{
+			$method = 'get' . ucfirst($attribute);
+
+			if (method_exists($this, $method))
+			{
+				return $this->{$method}($attribute);
+			}
+
+			return $this->{$attribute};
+		}
+
+		return $defaultValue;
+	}
+
+	public function getConfirmField()
+	{
+		if ($form = $this->getForm())
+		{
+			return $this->confirmField ? $form->getField($this->confirmField) : false;
+		}
+
+		return false;
+	}
+
+	public function getForm(): ?Form
+	{
+		return $this->form;
+	}
+
+	public function setForm(Form $form)
+	{
+		$this->form = $form;
+
+		return $this;
+	}
+
+	public function setTranslationData($dataValue, $language = null)
+	{
+		if (null === $language && is_array($dataValue))
+		{
+			foreach ($dataValue as $langCode => $value)
+			{
+				$this->translationsData[$langCode] = $this->cleanValue($value);
+			}
+		}
+		else
+		{
+			$this->translationsData[$language] = $this->cleanValue($dataValue);
+		}
+
+		return $this;
+	}
+
+	public function applyTranslationValue($language)
+	{
+		$this->setValue($this->getTranslationData($language));
+
+		return $this;
+	}
+
+	public function getTranslationData($language = null)
+	{
+		if (null === $language)
+		{
+			return $this->translationsData;
+		}
+
+		return isset($this->translationsData[$language]) ? $this->translationsData[$language] : null;
+	}
+
+	public function __get($name)
+	{
+		return $this->get($name);
+	}
+
+	public function __set($name, $value)
+	{
+		return $this->set($name, $value);
+	}
+
+	public function __toString()
+	{
+		return $this->toString();
 	}
 
 	protected function getDataAttributesString()
@@ -342,28 +570,13 @@ abstract class Field
 		return $dataAttributes;
 	}
 
-	public function getConfirmField()
+	protected function renderValue($value)
 	{
-		if ($form = $this->getForm())
-		{
-			return $this->confirmField ? $form->getField($this->confirmField) : false;
-		}
-
-		return false;
+		return htmlspecialchars((string) $value, ENT_COMPAT, 'UTF-8');
 	}
 
-	public function __get($name)
+	protected function renderText($text)
 	{
-		return $this->get($name);
-	}
-
-	public function __set($name, $value)
-	{
-		return $this->set($name, $value);
-	}
-
-	public function __toString()
-	{
-		return $this->toString();
+		return htmlentities($this->_((string) $text));
 	}
 }

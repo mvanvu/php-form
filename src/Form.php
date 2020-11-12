@@ -2,28 +2,36 @@
 
 namespace MaiVu\Php\Form;
 
+use Closure;
 use MaiVu\Php\Registry;
 
 class Form
 {
-	/** @var string */
+	protected static $fieldTranslator = null;
+
+	protected static $options = [
+		'fieldNamespaces' => [Field::class],
+		'ruleNamespaces'  => [Rule::class],
+		'templatePaths'   => [__DIR__ . '/tmpl'],
+		'template'        => 'bootstrap',
+		'layout'          => 'vertical',
+		'messages'        => [
+			'required' => '%field% is required!',
+			'invalid'  => '%field% is invalid!',
+		],
+	];
+
 	protected $name;
 
-	/** @var Registry */
 	protected $data;
 
-	/** @var array */
 	protected $fields = [];
 
-	/** @var array */
 	protected $messages = [];
 
-	/** @var string */
 	protected $prefixNameField = '';
 
-	/** @var string */
 	protected $suffixNameField = '';
-
 
 	public function __construct($name, $data = null, $rootKey = null)
 	{
@@ -32,7 +40,7 @@ class Form
 		if (strpos($name, '.'))
 		{
 			$parts  = explode('.', $name);
-			$prefix = array_shift($parts) . '{prefix}';
+			$prefix = array_shift($parts) . '{replace}';
 			$count  = count($parts);
 
 			if ($count > 1)
@@ -49,7 +57,7 @@ class Form
 		}
 		else
 		{
-			$this->prefixNameField = $name . '{prefix}[';
+			$this->prefixNameField = $name . '{replace}[';
 			$this->suffixNameField = ']';
 		}
 
@@ -61,51 +69,9 @@ class Form
 		}
 	}
 
-	public function getRenderFieldName($fieldName, $language = null)
-	{
-		return str_replace('{prefix}', '', $this->prefixNameField . $fieldName . $this->suffixNameField);
-	}
-
-	public function bind($data)
-	{
-		$registry     = new Registry($data);
-		$filteredData = [];
-
-		/** @var Field $field */
-		foreach ($this->fields as $field)
-		{
-			$fieldName = $field->getName(true);
-
-			if ($registry->has($fieldName))
-			{
-				$filteredData[$fieldName] = $field->applyFilters($registry->get($fieldName));
-			}
-		}
-
-		$this->data->merge($filteredData);
-
-		return $filteredData;
-	}
-
-	protected function loadField($config)
-	{
-		if (isset($config['type']))
-		{
-			$fieldClass = 'MaiVu\\Php\\Form\\Field\\' . $config['type'];
-
-			if (class_exists($fieldClass))
-			{
-				/** @var Field $field */
-				$field               = new $fieldClass($config, $this);
-				$name                = $field->getName(true);
-				$this->fields[$name] = $field;
-			}
-		}
-	}
-
 	public function load($data, $rootKey = null)
 	{
-		$data = $this->data->parse($data);
+		$data = Registry::parseData($data);
 
 		if ($rootKey && isset($data[$rootKey]))
 		{
@@ -120,14 +86,131 @@ class Form
 		return $this;
 	}
 
-	public function getData()
+	protected function loadField($config)
 	{
-		return $this->data;
+		if (isset($config['type']))
+		{
+			$fieldClass = null;
+
+			if (false === strpos($config['type'], '\\'))
+			{
+				foreach (static::$options['fieldNamespaces'] as $namespace)
+				{
+					if (class_exists($namespace . '\\' . $config['type']))
+					{
+						$fieldClass = $namespace . '\\' . $config['type'];
+						break;
+					}
+				}
+			}
+			elseif (class_exists($config['type']))
+			{
+				$fieldClass = $config['type'];
+			}
+
+			if ($fieldClass)
+			{
+				$field = new $fieldClass($config, $this);
+
+				if ($field instanceof Field)
+				{
+					$name                = $field->getName(true);
+					$this->fields[$name] = $field;
+				}
+			}
+		}
 	}
 
-	public function getName()
+	public static function getOptions(array $extendsOptions = [])
 	{
-		return $this->name;
+		if ($extendsOptions)
+		{
+			return static::extendsOptions($extendsOptions);
+		}
+
+		return static::$options;
+	}
+
+	public static function setOptions(array $options)
+	{
+		static::$options = static::extendsOptions($options);
+	}
+
+	public static function extendsOptions(array $options)
+	{
+		$result = static::$options;
+
+		foreach ($options as $name => $value)
+		{
+			if (isset($result[$name]) && gettype($value) === gettype($result[$name]))
+			{
+				$result[$name] = is_array($value) ? array_merge($value, $result[$name]) : $value;
+			}
+		}
+
+		return $result;
+	}
+
+	public static function getFieldTranslator()
+	{
+		return static::$fieldTranslator;
+	}
+
+	public static function setFieldTranslator(Closure $closure)
+	{
+		static::$fieldTranslator = $closure;
+	}
+
+	public static function addFieldNamespaces($namespaces)
+	{
+		static::setOptions(['fieldNamespaces' => (array) $namespaces]);
+	}
+
+	public static function addRuleNamespaces($namespaces)
+	{
+		static::setOptions(['ruleNamespaces' => (array) $namespaces]);
+	}
+
+	public static function addTemplatePaths($paths)
+	{
+		static::setOptions(['templatePaths' => (array) $paths]);
+	}
+
+	public static function setTemplate($template, $layout = 'vertical')
+	{
+		static::setOptions(['template' => $template, 'layout' => $layout]);
+	}
+
+	public function getRenderFieldName($fieldName, $language = null)
+	{
+		$replace   = $language ? '[translations][' . $language . ']' : '';
+		$subject   = $this->prefixNameField . $fieldName . $this->suffixNameField;
+		$fieldName = str_replace('{replace}', $replace, $subject);
+
+		if (0 === strpos($fieldName, '['))
+		{
+			$fieldName = trim($fieldName, '[]');
+		}
+
+		return $fieldName;
+	}
+
+	public function addField(Field $field)
+	{
+		$this->fields[$field->getName(true)] = $field;
+		$field->setForm($this);
+
+		return $this;
+	}
+
+	public function renderField($name, $options = [])
+	{
+		if ($field = $this->getField($name))
+		{
+			return $field->render($options);
+		}
+
+		return null;
 	}
 
 	/**
@@ -146,41 +229,43 @@ class Form
 		return false;
 	}
 
-	public function addField(Field $field)
+	public function getData()
 	{
-		$this->fields[$field->getName(true)] = $field;
-		$field->setForm($this);
-
-		return $this;
+		return $this->data;
 	}
 
-	protected function renderTemplateField(Field $field)
+	public function getName()
 	{
-		return $field->toString();
+		return $this->name;
 	}
 
-	public function renderField($name)
+	public function renderHorizontal()
 	{
-		/** @var Field $field */
-		if ($field = $this->getField($name))
-		{
-			return $this->renderTemplateField($field);
-		}
-
-		return null;
+		return $this->renderFields(['layout' => 'horizontal']);
 	}
 
-	public function renderFields()
+	public function renderFields(array $options = [])
 	{
 		$results = [];
 
-		/** @var Field $field */
 		foreach ($this->fields as $field)
 		{
-			$results[] = $this->renderTemplateField($field);
+			$results[] = $field->render($options);
 		}
 
 		return implode(PHP_EOL, $results);
+	}
+
+	public function renderTemplate(string $template, bool $horizontal = false)
+	{
+		$options = ['template' => $template];
+
+		if ($horizontal)
+		{
+			$options['layout'] = 'horizontal';
+		}
+
+		return $this->renderFields($options);
 	}
 
 	public function has($fieldName)
@@ -208,7 +293,7 @@ class Form
 		$this->messages = [];
 		$isValid        = true;
 
-		if (is_array($bindData))
+		if (null !== $bindData)
 		{
 			$this->bind($bindData);
 		}
@@ -216,7 +301,12 @@ class Form
 		/** @var Field $field */
 		foreach ($this->fields as $field)
 		{
-			if (!$field->isValid())
+			if ($field->isValid())
+			{
+				// Update field data
+				$this->data->set($field->getName(true), $field->getValue());
+			}
+			else
 			{
 				$isValid        = false;
 				$this->messages = array_merge($this->messages, $field->get('errorMessages', []));
@@ -224,6 +314,27 @@ class Form
 		}
 
 		return $isValid;
+	}
+
+	public function bind($data, array $translationsData = [])
+	{
+		$registry     = new Registry($data);
+		$filteredData = [];
+
+		foreach ($this->fields as $field)
+		{
+			$fieldName                = $field->getName(true);
+			$filteredData[$fieldName] = $field->applyFilters($registry->get($fieldName, null));
+
+			if (isset($translationsData[$fieldName]))
+			{
+				$field->setTranslationData($translationsData[$fieldName]);
+			}
+		}
+
+		$this->data->merge($filteredData);
+
+		return $filteredData;
 	}
 
 	public function remove($fieldName)

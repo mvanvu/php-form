@@ -18,7 +18,6 @@ class TextArea extends Field
 	/** @var string */
 	protected $autocomplete = '';
 
-
 	public function toString()
 	{
 		$input = '<textarea class="' . $this->class . '"'
@@ -36,9 +35,14 @@ class TextArea extends Field
 			$input .= ' readonly';
 		}
 
+		if ($this->disabled)
+		{
+			$input .= ' disabled';
+		}
+
 		if ($this->hint)
 		{
-			$input .= ' placeholder="' . htmlspecialchars($this->hint, ENT_COMPAT, 'UTF-8') . '"';
+			$input .= ' placeholder="' . htmlspecialchars($this->_($this->hint), ENT_COMPAT, 'UTF-8') . '"';
 		}
 
 		if ($this->autocomplete)

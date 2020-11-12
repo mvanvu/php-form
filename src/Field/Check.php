@@ -2,36 +2,51 @@
 
 namespace MaiVu\Php\Form\Field;
 
-use MaiVu\Php\Form\Field;
+use MaiVu\Php\Form\Field\Base\InputBase;
 
-class Check extends Field
+class Check extends InputBase
 {
-	protected $checkboxValue = null;
+	protected $inputType = 'checkbox';
+	protected $checked = false;
 
-	public function toString()
+	public function load($config)
 	{
-		$input = '<input' . ($this->class ? ' class="' . $this->class . '"' : '')
-			. ' name="' . $this->getName() . '" type="checkbox" id="' . $this->getId() . '"'
-			. ' value="' . htmlspecialchars($this->checkboxValue, ENT_COMPAT, 'UTF-8') . '"'
-			. $this->getDataAttributesString();
-
-		if ($this->required)
+		if (isset($config['value']))
 		{
-			$input .= ' required';
+			$this->value = (string) $config['value'];
+			unset($config['value']);
 		}
 
-		if ($this->readonly)
+		return parent::load($config);
+	}
+
+	public function setValue($value)
+	{
+		$this->checked = ($value == $this->value);
+
+		return $this;
+	}
+
+	public function getValue()
+	{
+		return $this->checked ? $this->value : $this->cleanValue(null);
+	}
+
+	public function applyFilters($value = null, $forceNull = false)
+	{
+		if (null === $value)
 		{
-			$input .= ' readonly';
+			$forceNull = true;
 		}
 
-		if ($this->checkboxValue === $this->value)
+		return parent::applyFilters($value, $forceNull);
+	}
+
+	protected function prepareInputAttribute(&$input)
+	{
+		if ($this->checked)
 		{
 			$input .= ' checked';
 		}
-
-		$input .= '/>';
-
-		return $input;
 	}
 }
