@@ -2,11 +2,12 @@
 
 namespace MaiVu\Php\Form;
 
+use ArrayAccess;
 use Closure;
 use MaiVu\Php\Filter;
 use MaiVu\Php\Registry;
 
-abstract class Field
+abstract class Field implements ArrayAccess
 {
 	protected $form = null;
 
@@ -546,6 +547,26 @@ abstract class Field
 	public function __toString()
 	{
 		return $this->toString();
+	}
+
+	public function offsetExists($offset)
+	{
+		return property_exists($this, $offset);
+	}
+
+	public function offsetGet($offset)
+	{
+		return $this->get($offset);
+	}
+
+	public function offsetSet($offset, $value)
+	{
+		return $this->set($offset, $value);
+	}
+
+	public function offsetUnset($offset)
+	{
+		return $this->set($offset, null);
 	}
 
 	protected function getDataAttributesString()
