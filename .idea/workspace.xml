@@ -20,30 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="531b53a2-78a1-4228-8317-34240a053f79" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Field/Base/CheckBase.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Field/CheckList.php" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/assets/js/show-on.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/tmpl/uikit-3/fields/field-check.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field/Check.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field/Check.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field/Hidden.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field/Hidden.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field/InputAbstract.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field/Base/InputBase.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field/OptionAbstract.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field/Base/OptionsBase.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field/Password.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field/Password.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field/Radio.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field/Radio.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field/Select.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field/Select.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field/Text.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field/Text.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Field/TextArea.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Field/TextArea.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Form.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Form.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FormsManager.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/FormsManager.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Rule/Confirm.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Rule/Confirm.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Rule/Date.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Rule/Date.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Rule/Email.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Rule/Email.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Rule/Options.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Rule/Options.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Rule/Regex.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Rule/Regex.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Rule/Rule.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/Rule.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +98,7 @@
       <workItem from="1605069234150" duration="1294000" />
       <workItem from="1605075513399" duration="5000" />
       <workItem from="1605087397015" duration="1735000" />
-      <workItem from="1605144861266" duration="3158000" />
+      <workItem from="1605144861266" duration="3335000" />
     </task>
     <servers />
   </component>
