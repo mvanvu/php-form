@@ -26,7 +26,7 @@ composer require mvanvu/php-form
 ## Usage
 
 ```php
-use MaiVu\Php\Form;
+use MaiVu\Php\Form\Form;
 
 $fieldsData = [/*See tests/index.php to know how to create the fields data*/];
 $form = new Form($fieldsData);
