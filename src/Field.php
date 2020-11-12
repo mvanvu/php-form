@@ -52,8 +52,6 @@ abstract class Field
 
 	protected $translate = false;
 
-	protected $ucmFieldId = 0;
-
 	protected $language = '*';
 
 	protected $translationsData = [];
