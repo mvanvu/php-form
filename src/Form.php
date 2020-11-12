@@ -35,32 +35,18 @@ class Form
 
 	public function __construct($name, $data = null, $rootKey = null)
 	{
-		$this->name = $name;
-
-		if (strpos($name, '.'))
+		if (is_array($name) || is_object($name))
 		{
-			$parts  = explode('.', $name);
-			$prefix = array_shift($parts) . '{replace}';
-			$count  = count($parts);
-
-			if ($count > 1)
+			if (null !== $data)
 			{
-				$prefix .= '[' . implode('][', $parts) . ']';
-			}
-			elseif ($count === 1)
-			{
-				$prefix .= '[' . $parts[0] . ']';
+				$rootKey = (string) $data;
 			}
 
-			$this->prefixNameField = $prefix . '[';
-			$this->suffixNameField = ']';
-		}
-		else
-		{
-			$this->prefixNameField = $name . '{replace}[';
-			$this->suffixNameField = ']';
+			$data = $name;
+			$name = '';
 		}
 
+		$this->setName($name);
 		$this->data = new Registry;
 
 		if ($data)
@@ -237,6 +223,35 @@ class Form
 	public function getName()
 	{
 		return $this->name;
+	}
+
+	public function setName(string $name)
+	{
+		if (strpos($name, '.'))
+		{
+			$parts  = explode('.', $name);
+			$prefix = array_shift($parts) . '{replace}';
+			$count  = count($parts);
+
+			if ($count > 1)
+			{
+				$prefix .= '[' . implode('][', $parts) . ']';
+			}
+			elseif ($count === 1)
+			{
+				$prefix .= '[' . $parts[0] . ']';
+			}
+
+			$this->prefixNameField = $prefix . '[';
+			$this->suffixNameField = ']';
+		}
+		else
+		{
+			$this->prefixNameField = $name . '{replace}[';
+			$this->suffixNameField = ']';
+		}
+
+		$this->name = $name;
 	}
 
 	public function renderHorizontal()

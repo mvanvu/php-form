@@ -5,7 +5,7 @@ namespace MaiVu\Php\Form\Rule;
 use MaiVu\Php\Form\Field;
 use MaiVu\Php\Form\Rule;
 
-class Email implements Rule
+class Email extends Rule
 {
 	public function validate(Field $field): bool
 	{

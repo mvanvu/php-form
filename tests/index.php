@@ -4,7 +4,6 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 use MaiVu\Php\Form\Form;
 
 $form = new Form(
-	'',
 	[
 		[
 			'name'  => 'hiddenField',
@@ -125,10 +124,11 @@ $form = new Form(
 			'label'        => 'Confirm password',
 			'class'        => 'form-control',
 			'required'     => true,
-			'rules'        => ['Confirm'],
+			'rules'        => ['Confirm', 'Confirm:pass1Field|2468'],
 			'confirmField' => 'pass1Field',
 			'messages'     => [
-				'Confirm' => 'Password is not match!',
+				'Confirm'                 => 'Password is not match!',
+				'Confirm:pass1Field|2468' => 'Password must be: 2468',
 			],
 			'showOn'       => 'pass1Field : is not empty',
 		],
@@ -153,6 +153,11 @@ $form = new Form(
 			'filters'     => ['basicHtml'],
 			'required'    => true,
 			'showOn'      => 'checkField : is checked',
+			'rules'       => ['MinLength:5', 'MaxLength:15'],
+			'messages'    => [
+				'MinLength' => 'Min length is 5',
+				'MaxLength' => 'Max length is 15',
+			],
 		],
 	]
 );

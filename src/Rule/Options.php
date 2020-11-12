@@ -5,7 +5,7 @@ namespace MaiVu\Php\Form\Rule;
 use MaiVu\Php\Form\Field;
 use MaiVu\Php\Form\Rule;
 
-class Options implements Rule
+class Options extends Rule
 {
 	public function validate(Field $field): bool
 	{

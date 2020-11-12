@@ -129,6 +129,31 @@ abstract class Field implements ArrayAccess
 		foreach ($rules as $rule)
 		{
 			$ruleClass = null;
+			$rawName   = $rule;
+			$params    = [];
+
+			if (false !== strpos($rule, ':'))
+			{
+				$params = explode(':', $rule);
+				$rule   = $params[0];
+				array_shift($params);
+				$tmp = [];
+
+				foreach ($params as $param)
+				{
+					if (false === strpos($param, '|'))
+					{
+						$tmp[] = $param;
+					}
+					else
+					{
+						$part          = explode('|', $param, 2);
+						$tmp[$part[0]] = $part[1];
+					}
+				}
+
+				$params = $tmp;
+			}
 
 			if (false === strpos($rule, '\\'))
 			{
@@ -148,11 +173,11 @@ abstract class Field implements ArrayAccess
 
 			if ($ruleClass)
 			{
-				$ruleObj = new $ruleClass;
+				$ruleObj = new $ruleClass($params);
 
 				if ($ruleObj instanceof Rule)
 				{
-					$this->rules[$rule] = $ruleObj;
+					$this->rules[$rawName] = $ruleObj;
 				}
 			}
 		}
@@ -478,11 +503,16 @@ abstract class Field implements ArrayAccess
 		return $defaultValue;
 	}
 
-	public function getConfirmField()
+	public function getConfirmField($fieldName = null)
 	{
 		if ($form = $this->getForm())
 		{
-			return $this->confirmField ? $form->getField($this->confirmField) : false;
+			if (null === $fieldName)
+			{
+				$fieldName = $this->confirmField;
+			}
+
+			return $fieldName ? $form->getField($fieldName) : false;
 		}
 
 		return false;

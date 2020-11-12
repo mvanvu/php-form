@@ -2,7 +2,16 @@
 
 namespace MaiVu\Php\Form;
 
-interface Rule
+use MaiVu\Php\Registry;
+
+abstract class Rule
 {
-	public function validate(Field $field) : bool;
+	protected $params;
+
+	public function __construct($params)
+	{
+		$this->params = new Registry($params);
+	}
+
+	abstract public function validate(Field $field): bool;
 }
