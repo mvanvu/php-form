@@ -69,7 +69,13 @@ else
     cd php-from
 `
 
-3 - Run test server
+2 - Composer install
+
+`
+    composer install
+`
+
+4 - Run test server
 
 `
 php -S localhost:9000/tests
