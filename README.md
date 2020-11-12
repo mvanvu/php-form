@@ -69,7 +69,7 @@ else
     cd php-from
 `
 
-2 - Composer install
+3 - Composer install
 
 `
     composer install
