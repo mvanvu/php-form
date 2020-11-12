@@ -13,219 +13,31 @@ Alternatively, from the command line:
 ```sh
 composer require mvanvu/php-form
 ```
-## Usage
+## Testing
 
-``` php
-use MaiVu\Php\Form\Form;
+1 - Clone this repo:
 
-// Data is an array or mixed that will be parsed by Registry see more (https://github.com/mvanvu/php-registry)
-$data = [
-	[
-		'name'          => 'checkField',
-		'type'          => 'Check',
-		'checkboxValue' => 'Y',
-		'value'         => 'Y',
-		'filters'       => ['yesNo'],
-	],
-	[
-		'name'     => 'textField',
-		'type'     => 'Text',
-		'value'    => 'Default text value',
-		'hint'     => 'Text placeholder',
-		'required' => true,
-		'rules'    => ['Email'],
-		'messages' => [
-			'requireMessage' => 'The textField is required.',
-			'Email'          => 'Invalid email.',
-		],
-	],
-	[
-		'name'    => 'selectField',
-		'type'    => 'Select',
-		'value'   => 'optValue1',
-		'options' => [
-			'foo'   => 'bar',
-			'value' => 'text',
-			'Group' => [
-				'optValue1' => 'optText 1',
-				'optValue2' => 'optText 2',
-			],
-		],
-		'rules'   => ['Options'],
-	],
-];
+`   git clone https://github.com/mvanvu/php-form.git    
+`
 
-// Create a form and initialize fields data
-$form = new Form('FormData', $data);
+2 - Go to the repo
 
-// Or
-$form = new Form('FormData');
-$form->load($data);
+`
+    cd php-from
+`
 
-// Render fields
-echo $form->renderFields();
+3 - Run test server
 
-// Output
-<input name="FormData[checkField]" type="checkbox" id="FormData-checkField" value="Y" checked/>
-<input name="FormData[textField]" type="text" id="FormData-textField" value="Default text value" required placeholder="Text placeholder"/>
-<select name="FormData[selectField]" id="FormData-selectField">
-    <option value="foo">bar</option>
-    <option value="value">text</option>
-    <optgroup label="Group">
-        <option value="optValue1" selected>optText 1</option>
-        <option value="optValue2">optText 2</option>
-    </optgroup>
-</select>
+`
+php -S localhost:9000/tests
+`
 
-// Render by a specific field name
-echo $form->renderField('textField');
-
-// Output
-<input name="FormData[textField]" type="text" id="FormData-textField" value="Default text value" required placeholder="Text placeholder"/>
-
-// Get a field object
-$field = $form->getField('textField');
-var_dump($field); // Dump
-echo $field->toString(); // Render field
-echo $field->getValue(); // Get field value
-$field->setValue($value) // Set field value
-...
-
-// Bind data (array|mixed)
-$form->bind(
-    [
-        'textField' => 'Update text field value',
-    ]
-);
-
-echo $form->renderField('textField');
-
-// Output
-<input name="FormData[textField]" type="text" id="FormData-textField" value="Update text field value" required placeholder="Text placeholder"/>
-```
-
-## Use Rules and filters see more (https://github.com/mvanvu/php-filter)
-```php
-$data = [
-    [
-        ...
-        'filters' => ['string', 'trim'],
-        'rules' => ['Options'], // case sensitive
-        'messages' => [
-            'Options' => 'Invalid option value.',
-        ],
-    ],
-];
-
-$postData = [
-    'selectField' => 'No option value',
-];
-
-$validData = $form->bind($postData);
-
-// Return false
-if ($form->isValid())
-{
-    $validData = $form->getData()->toArray();
-}
-else
-{
-    // return ['Invalid option value.'];
-    var_dump($form->getMessages());
-}
-
-
-// The same
-if ($form->isValid($postData))
-{
-    $validData = $form->getData()->toArray();
-}
-else
-{
-    // return ['Invalid option value.'];
-    var_dump($form->getMessages());
-}
-
-```
-
-## With form or without form
-#### With form
-```php
-echo $form->renderField('textField');
-
-// Output the name field which includes the form name (FormData) => FormData[textField]
-<input name="FormData[textField]" type="text" id="FormData-textField" value="Update text field value" required placeholder="Text placeholder"/>
-
-// Deep form name
-$form = new Form('FormData.params', $fieldsData);
-echo $form->renderField('textField'); // field name is FormData[params][textField]
-
-$form = new Form('FormData.foo.bar', $fieldsData);
-echo $form->renderField('textField'); // field name is FormData[foo][bar][textField]
-```
-
-#### Without form
-```php
-
-use MaiVu\Php\Form\Field\Text;
-
-$textField = new Text(
-	[
-		'name'     => 'textField',
-		'type'     => 'Text',
-		'value'    => 'Default text value',
-		'hint'     => 'Text placeholder',
-		'required' => true,
-		'rules'    => ['Email'],
-		'messages' => [
-			'requireMessage' => 'The textField is required.',
-			'Email'          => 'Invalid email.',
-		],
-	]
-);
-
-echo $textField->toString();
-
-// Output the name field which does not include the form name (FormData) => textField
-<input name="textField" type="text" id="textField" value="Default text value" required placeholder="Text placeholder"/>
-
-```
-
-## Create a new field
-```php
-
-// Create a new field at src/Field/Custom.php
-
-namespace MaiVu\Php\Form\Field;
-
-use MaiVu\Php\Form\Field;
-
-class Custom extends Field
-{
-    public function toString()
-    {
-        return 'This is my custom field with name is: ' . $this->name;
-    }
-}
-
-// Use
-$form = new Form('FormData', 
-    [
-        [
-            'name' => 'myCustomField',
-            'type' => 'Custom',
-            ...
-        ]
-    ]
-);
-
-// Return 'This is my custom field with name is myCustomField: '
-echo $form->renderField('myCustomField');
-```
+4 - Open the browser with url localhost:9000/tests
 
 ## Default fields see at path src/Field
 
 * Check
+* CheckList
 * Email
 * Hidden
 * Number
