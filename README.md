@@ -1,6 +1,12 @@
 # Php Form Package
+Manage the form fields in easy way. 
 
-Manage the form fields in easy way. Support templates: Bootstrap (3 and 4) and Uikit 3
+## Features
+* Render form via templates: Bootstrap (v3 and v4) and Uikit v3
+* Ability to add new custom fields
+* Ability to add new custom rules (for validation)
+* Cool feature show/hide on (must include assets/js/show-on.js)
+* Create once and using to render HTML form and validate from the PHP server
 
 ## Installation via Composer (not yet)
 ```json
