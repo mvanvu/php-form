@@ -229,9 +229,9 @@ class Form
 		return false;
 	}
 
-	public function getData()
+	public function getData($toArray = false)
 	{
-		return $this->data;
+		return $toArray ? $this->data->toArray() : $this->data;
 	}
 
 	public function getName()

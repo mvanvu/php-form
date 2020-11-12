@@ -9,16 +9,13 @@ class Options implements Rule
 {
 	public function validate(Field $field): bool
 	{
-		$value    = $field->getValue();
-		$required = $field->get('required', false);
-		$options  = $field->get('options', []);
-
-		if (empty($options) || (!$required && empty($value)))
+		if (!($options = $field->get('options', [])))
 		{
-			return true;
+			return false;
 		}
 
 		$optionValues = [];
+		$value        = $field->getValue();
 
 		foreach ($options as $option)
 		{

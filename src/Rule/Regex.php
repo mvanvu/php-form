@@ -13,11 +13,11 @@ class Regex implements Rule
 		$regex    = $field->get('regex', null);
 		$required = $field->get('required', false);
 
-		if (empty($regex) || (empty($value) && !$required))
+		if (empty($regex) || (empty($value) && $value != '0' && !$required))
 		{
 			return true;
 		}
 
-		return false !== preg_match('/' . $regex . '/', $value);
+		return 1 === @preg_match('/' . $regex . '/', $value);
 	}
 }
