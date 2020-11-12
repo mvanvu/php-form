@@ -8,7 +8,6 @@ use MaiVu\Php\Registry;
 class Form
 {
 	protected static $fieldTranslator = null;
-
 	protected static $options = [
 		'fieldNamespaces' => [Field::class],
 		'ruleNamespaces'  => [Rule::class],
@@ -32,6 +31,10 @@ class Form
 	protected $prefixNameField = '';
 
 	protected $suffixNameField = '';
+
+	protected $beforeValidation = null;
+
+	protected $afterValidation = null;
 
 	public function __construct($name, $data = null, $rootKey = null)
 	{
@@ -165,6 +168,16 @@ class Form
 	public static function setTemplate($template, $layout = 'vertical')
 	{
 		static::setOptions(['template' => $template, 'layout' => $layout]);
+	}
+
+	public function beforeValidation($callback)
+	{
+		$this->beforeValidation = is_callable($callback) ? $callback : null;
+	}
+
+	public function afterValidation($callback)
+	{
+		$this->afterValidation = is_callable($callback) ? $callback : null;
 	}
 
 	public function getRenderFieldName($fieldName, $language = null)
@@ -313,6 +326,11 @@ class Form
 			$this->bind($bindData);
 		}
 
+		if ($this->beforeValidation)
+		{
+			call_user_func_array($this->beforeValidation, [$this]);
+		}
+
 		/** @var Field $field */
 		foreach ($this->fields as $field)
 		{
@@ -326,6 +344,11 @@ class Form
 				$isValid        = false;
 				$this->messages = array_merge($this->messages, $field->get('errorMessages', []));
 			}
+		}
+
+		if ($this->afterValidation)
+		{
+			call_user_func_array($this->afterValidation, [$this, $isValid]);
 		}
 
 		return $isValid;
