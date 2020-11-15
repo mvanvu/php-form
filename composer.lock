@@ -121,12 +121,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/mvanvu/php-assets.git",
-                "reference": "b00778a8c2292810b7f96defece8e33a7a3b4bd7"
+                "reference": "ad5782b6468a61ad23573875106b53f9fb57119a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mvanvu/php-assets/zipball/b00778a8c2292810b7f96defece8e33a7a3b4bd7",
-                "reference": "b00778a8c2292810b7f96defece8e33a7a3b4bd7",
+                "url": "https://api.github.com/repos/mvanvu/php-assets/zipball/ad5782b6468a61ad23573875106b53f9fb57119a",
+                "reference": "ad5782b6468a61ad23573875106b53f9fb57119a",
                 "shasum": ""
             },
             "require": {
@@ -159,7 +159,7 @@
                 "css",
                 "php"
             ],
-            "time": "2020-11-15T07:50:25+00:00"
+            "time": "2020-11-15T08:44:31+00:00"
         },
         {
             "name": "mvanvu/php-filter",

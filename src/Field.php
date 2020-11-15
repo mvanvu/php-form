@@ -479,11 +479,8 @@ abstract class Field implements ArrayAccess
 			}
 		}
 
-		static $loadedShowOnJs = false;
-
-		if ($showOnData && !$loadedShowOnJs)
+		if ($showOnData)
 		{
-			$loadedShowOnJs = true;
 			Assets::addFile(dirname(__DIR__) . '/assets/js/show-on.js');
 		}
 
