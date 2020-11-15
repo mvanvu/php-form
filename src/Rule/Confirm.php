@@ -3,6 +3,7 @@
 namespace MaiVu\Php\Form\Rule;
 
 use MaiVu\Php\Form\Field;
+use MaiVu\Php\Form\Field\Check;
 use MaiVu\Php\Form\Rule;
 
 class Confirm extends Rule
@@ -21,7 +22,21 @@ class Confirm extends Rule
 
 			if (is_string($key) && ($confirmField = $form->getField($key)))
 			{
-				return $confirmField->getValue() == $params[$key];
+				if (in_array($value, ['', '!']))
+				{
+					$isEmpty = empty($confirmField->getValue());
+
+					return ('' == $value && $isEmpty) || ('!' == $value && !$isEmpty);
+				}
+
+				if ($confirmField instanceof Check && in_array($value, ['[checked]', '[!checked]']))
+				{
+					$isChecked = $confirmField->isChecked();
+
+					return ('[checked]' == $value && $isChecked) || ('[!checked]' == $value && !$isChecked);
+				}
+
+				return $confirmField->getValue() == $value;
 			}
 
 			if ($confirmField = $form->getField($value))

@@ -128,17 +128,17 @@ $form = new Form(
 			'required' => true,
 		],
 		[
-			'name'         => 'pass2Field',
-			'type'         => 'Password',
-			'label'        => 'Confirm password',
-			'class'        => 'form-control',
-			'required'     => true,
-			'rules'        => ['Confirm:pass1Field', 'Confirm:pass1Field|2468'],
-			'messages'     => [
+			'name'     => 'pass2Field',
+			'type'     => 'Password',
+			'label'    => 'Confirm password',
+			'class'    => 'form-control',
+			'required' => true,
+			'rules'    => ['Confirm:pass1Field', 'Confirm:pass1Field|2468'],
+			'messages' => [
 				'Confirm:pass1Field'      => 'Password is not match!',
 				'Confirm:pass1Field|2468' => 'Password must be: 2468',
 			],
-			'showOn'       => 'pass1Field : is not empty',
+			'showOn'   => 'pass1Field : is not empty',
 		],
 		[
 			'name'        => 'checkField',
@@ -150,6 +150,7 @@ $form = new Form(
 			'description' => 'Check this field to see the textarea',
 			'class'       => 'uk-checkbox',
 			'rules'       => [
+				'Confirm:textareaField|!',
 				'checked' => function (Check $field) {
 
 					if (!($isChecked = $field->isChecked()))
@@ -158,7 +159,10 @@ $form = new Form(
 					}
 
 					return $isChecked;
-				}
+				},
+			],
+			'messages'    => [
+				'Confirm:textareaField|!' => 'The textarea must not be empty.',
 			],
 		],
 		[
