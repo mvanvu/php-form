@@ -2,25 +2,18 @@
 
 namespace MaiVu\Php\Form\Rule;
 
+use DateTime;
+use Exception;
 use MaiVu\Php\Form\Field;
 use MaiVu\Php\Form\Rule;
-use DateTime, Exception;
 
 class Date extends Rule
 {
 	public function validate(Field $field): bool
 	{
-		$value    = $field->getValue();
-		$required = $field->get('required', false);
-
-		if (empty($value) && !$required)
-		{
-			return true;
-		}
-
 		try
 		{
-			new DateTime($value);
+			new DateTime($field->getValue());
 		}
 		catch (Exception $e)
 		{

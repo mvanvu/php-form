@@ -42,6 +42,11 @@ class Check extends InputBase
 		return parent::applyFilters($value, $forceNull);
 	}
 
+	public function isChecked()
+	{
+		return $this->checked;
+	}
+
 	protected function prepareInputAttribute(&$input)
 	{
 		if ($this->checked)

@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
+use MaiVu\Php\Form\Field\Check;
 use MaiVu\Php\Form\Form;
 
 $form = new Form(
@@ -99,6 +100,14 @@ $form = new Form(
 			'description' => 'This is a select field',
 		],
 		[
+			'name'        => 'emailField',
+			'type'        => 'Email',
+			'label'       => 'Email Field',
+			'class'       => 'form-control',
+			'hint'        => 'Please enter a valid email',
+			'description' => 'This is a email field',
+		],
+		[
 			'name'        => 'textField',
 			'type'        => 'Text',
 			'label'       => 'Text Field',
@@ -124,10 +133,10 @@ $form = new Form(
 			'label'        => 'Confirm password',
 			'class'        => 'form-control',
 			'required'     => true,
-			'rules'        => ['Confirm', 'Confirm:pass1Field|2468'],
+			'rules'        => ['Confirm:pass1Field', 'Confirm:pass1Field|2468'],
 			'confirmField' => 'pass1Field',
 			'messages'     => [
-				'Confirm'                 => 'Password is not match!',
+				'Confirm:pass1Field'      => 'Password is not match!',
 				'Confirm:pass1Field|2468' => 'Password must be: 2468',
 			],
 			'showOn'       => 'pass1Field : is not empty',
@@ -141,6 +150,17 @@ $form = new Form(
 			'filters'     => ['yesNo'],
 			'description' => 'Check this field to see the textarea',
 			'class'       => 'uk-checkbox',
+			'rules'       => [
+				'checked' => function (Check $field) {
+
+					if (!($isChecked = $field->isChecked()))
+					{
+						$field->setMessage('checked', 'You must check on this field.');
+					}
+
+					return $isChecked;
+				}
+			],
 		],
 		[
 			'name'        => 'textareaField',
@@ -155,8 +175,8 @@ $form = new Form(
 			'showOn'      => 'checkField : is checked',
 			'rules'       => ['MinLength:5', 'MaxLength:15'],
 			'messages'    => [
-				'MinLength' => 'Min length is 5',
-				'MaxLength' => 'Max length is 15',
+				'MinLength:5'  => 'Min length is 5',
+				'MaxLength:15' => 'Max length is 15',
 			],
 		],
 	]

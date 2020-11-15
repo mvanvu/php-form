@@ -9,23 +9,25 @@ class Confirm extends Rule
 {
 	public function validate(Field $field): bool
 	{
-		$fieldName = null;
-		$value     = $field->getValue();
+		if (!($form = $field->getForm()))
+		{
+			return false;
+		}
 
 		if ($params = $this->params->toArray())
 		{
 			$key   = array_keys($params)[0];
 			$value = $params[$key];
 
-			if (is_string($key))
+			if (is_string($key) && ($confirmField = $form->getField($key)))
 			{
-				$fieldName = $key;
+				return $confirmField->getValue() == $params[$key];
 			}
-		}
 
-		if ($confirmField = $field->getConfirmField($fieldName))
-		{
-			return $confirmField->getValue() == $value;
+			if ($confirmField = $form->getField($value))
+			{
+				return $confirmField->getValue() == $field->getValue();
+			}
 		}
 
 		return false;

@@ -9,15 +9,8 @@ class Regex extends Rule
 {
 	public function validate(Field $field): bool
 	{
-		$value    = $field->getValue();
-		$regex    = $field->get('regex', null);
-		$required = $field->get('required', false);
+		$regex = $field->get('regex', null);
 
-		if (empty($regex) || (empty($value) && $value != '0' && !$required))
-		{
-			return true;
-		}
-
-		return 1 === @preg_match('/' . $regex . '/', $value);
+		return 1 === @preg_match('/' . $regex . '/', $field->getValue());
 	}
 }

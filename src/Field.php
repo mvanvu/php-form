@@ -47,8 +47,6 @@ abstract class Field implements ArrayAccess
 
 	protected $value = null;
 
-	protected $confirmField = null;
-
 	protected $regex = null;
 
 	protected $translate = false;
@@ -126,8 +124,14 @@ abstract class Field implements ArrayAccess
 		$this->rules = [];
 		$formOptions = Form::getOptions();
 
-		foreach ($rules as $rule)
+		foreach ($rules as $k => $rule)
 		{
+			if ($rule instanceof Closure)
+			{
+				$this->rules[$k] = $rule;
+				continue;
+			}
+
 			$ruleClass = null;
 			$rawName   = $rule;
 			$params    = [];
@@ -258,11 +262,25 @@ abstract class Field implements ArrayAccess
 
 		if (count($this->rules))
 		{
-			/** @var Rule $ruleHandler */
+			/** @var Rule | Closure $ruleHandler */
 
 			foreach ($this->rules as $ruleName => $ruleHandler)
 			{
-				if (!$ruleHandler->validate($this))
+				if ($ruleHandler instanceof Closure)
+				{
+					$result = call_user_func_array($ruleHandler, [$this]);
+
+					if (!is_bool($result))
+					{
+						$result = false;
+					}
+				}
+				else
+				{
+					$result = $ruleHandler->validate($this);
+				}
+
+				if (!$result)
 				{
 					$isValid = false;
 
@@ -503,21 +521,6 @@ abstract class Field implements ArrayAccess
 		return $defaultValue;
 	}
 
-	public function getConfirmField($fieldName = null)
-	{
-		if ($form = $this->getForm())
-		{
-			if (null === $fieldName)
-			{
-				$fieldName = $this->confirmField;
-			}
-
-			return $fieldName ? $form->getField($fieldName) : false;
-		}
-
-		return false;
-	}
-
 	public function getForm(): ?Form
 	{
 		return $this->form;
@@ -597,6 +600,13 @@ abstract class Field implements ArrayAccess
 	public function offsetUnset($offset)
 	{
 		return $this->set($offset, null);
+	}
+
+	public function setMessage($name, $value)
+	{
+		$this->messages[$name] = (string) $value;
+
+		return $this;
 	}
 
 	protected function getDataAttributesString()
