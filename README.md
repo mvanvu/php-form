@@ -246,8 +246,14 @@ Check the value is a valid date
 ## Extends Field and Rule
 
 Create all your fields at src/Field, the field must be extended \MaiVu\Php\Form\Field class
+
+AND
+
 Create all your rules at src/Rule, the rule must be extended \MaiVu\Php\Form\Rule class
-OR if you want to use your custom namespace
+
+OR 
+
+if you want to use your custom namespace
 
 ```php
     
