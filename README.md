@@ -8,7 +8,13 @@ Manage the form fields in easy way.
 * Ability to add new custom rules (for validation)
 * Cool feature show/hide on
 * Create once and using to render HTML form and validate from the PHP server
+
+
+## Include dependencies
 * Php-assets (see https://github.com/mvanvu/php-assets)
+* Php-registry (see https://github.com/mvanvu/php-registry)
+* Php-filters (see https://github.com/mvanvu/php-filters)
+
 
 ## Installation via Composer
 ```json
@@ -49,7 +55,11 @@ echo $form->renderHorizontal();
 // Validate form
 if ($form->isValid($_POST))
 {
-    echo 'Cool! insert data to the database';
+    echo 'Cool! insert the valid data to the database';
+    $data      = $form->getData(); // Instance of Registry
+    $validData = $data->toArray();
+    var_dump($validData);
+
 }
 else
 {
