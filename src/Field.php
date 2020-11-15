@@ -123,69 +123,78 @@ abstract class Field implements ArrayAccess
 	public function setRules(array $rules)
 	{
 		$this->rules = [];
-		$formOptions = Form::getOptions();
 
-		foreach ($rules as $k => $rule)
+		foreach ($rules as $name => $rule)
 		{
-			if ($rule instanceof Closure)
+			$this->setRule($name, $rule);
+		}
+
+		return $this;
+	}
+
+	public function setRule($name, $rule)
+	{
+		if ($rule instanceof Closure)
+		{
+			$this->rules[$name] = $rule;
+
+			return $this;
+		}
+
+		$ruleClass = null;
+		$rawName   = $rule;
+		$params    = [];
+
+		if (false !== strpos($rule, ':'))
+		{
+			$params = explode(':', $rule);
+			$rule   = $params[0];
+			array_shift($params);
+			$tmp = [];
+
+			foreach ($params as $param)
 			{
-				$this->rules[$k] = $rule;
-				continue;
-			}
-
-			$ruleClass = null;
-			$rawName   = $rule;
-			$params    = [];
-
-			if (false !== strpos($rule, ':'))
-			{
-				$params = explode(':', $rule);
-				$rule   = $params[0];
-				array_shift($params);
-				$tmp = [];
-
-				foreach ($params as $param)
+				if (false === strpos($param, '|'))
 				{
-					if (false === strpos($param, '|'))
-					{
-						$tmp[] = $param;
-					}
-					else
-					{
-						$part          = explode('|', $param, 2);
-						$tmp[$part[0]] = $part[1];
-					}
+					$tmp[] = $param;
 				}
-
-				$params = $tmp;
-			}
-
-			if (false === strpos($rule, '\\'))
-			{
-				foreach ($formOptions['ruleNamespaces'] as $namespace)
+				else
 				{
-					if (class_exists($namespace . '\\' . $rule))
-					{
-						$ruleClass = $namespace . '\\' . $rule;
-						break;
-					}
+					$part          = explode('|', $param, 2);
+					$tmp[$part[0]] = $part[1];
 				}
 			}
-			elseif (class_exists($rule))
-			{
-				$ruleClass = $rule;
-			}
 
-			if ($ruleClass)
-			{
-				$ruleObj = new $ruleClass($params);
+			$params = $tmp;
+		}
 
-				if ($ruleObj instanceof Rule)
+		if (false === strpos($rule, '\\'))
+		{
+			foreach (Form::getOptions()['ruleNamespaces'] as $namespace)
+			{
+				if (class_exists($namespace . '\\' . $rule))
 				{
-					$this->rules[$rawName] = $ruleObj;
+					$ruleClass = $namespace . '\\' . $rule;
+					break;
 				}
 			}
 		}
+		elseif (class_exists($rule))
+		{
+			$ruleClass = $rule;
+		}
+
+		if ($ruleClass)
+		{
+			$ruleObj = new $ruleClass($params);
+
+			if ($ruleObj instanceof Rule)
+			{
+				$this->rules[$rawName] = $ruleObj;
+			}
+		}
+
+		return $this;
 	}
 
 	public function applyFilters($value = null, $forceNull = false)
