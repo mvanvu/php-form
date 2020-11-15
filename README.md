@@ -259,14 +259,14 @@ if you want to use your custom namespace
     
     use MaiVu\Php\Form\Form;
     
-    Form::addFieldNamespaces('Your\Custom\NS');
-    Form::addRuleNamespaces('Your\Custom\NS');        
+    Form::addFieldNamespaces('Your\\Custom\\MyNS');
+    Form::addRuleNamespaces('Your\\Custom\\MyNS');        
 ```
 
 Then create your FieldClass in your namespace
 
 ```php
-   namespace Your\Custom\NS;
+   namespace Your\Custom\MyNS;
    use MaiVu\Php\Form\Field;
     
    class MyCustomField extends Field
@@ -284,7 +284,7 @@ Then create your FieldClass in your namespace
 Create your RuleClass in your namespace
 
 ```php
-   namespace Your\Custom\NS;
+   namespace Your\Custom\MyNS;
    use MaiVu\Php\Form\Rule;
    use MaiVu\Php\Form\Field;
     
