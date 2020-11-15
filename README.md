@@ -68,6 +68,20 @@ else
 
 ```
 
+## Default fields see at path src/Field
+
+* Switcher (must include assets/css/switcher.css if you don't use the php-assets)
+* Check
+* CheckList
+* Email
+* Hidden
+* Number
+* Password
+* Radio
+* Select
+* Text
+* TextArea
+
 ## Show on feature
 Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
 
@@ -326,17 +340,3 @@ php -S localhost:9000/tests
 `
 
 4 - Open the browser with url localhost:9000/tests
-
-## Default fields see at path src/Field
-
-* Switcher (must include assets/css/switcher.css if you don't use the php-assets)
-* Check
-* CheckList
-* Email
-* Hidden
-* Number
-* Password
-* Radio
-* Select
-* Text
-* TextArea
