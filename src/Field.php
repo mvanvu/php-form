@@ -301,11 +301,9 @@ abstract class Field implements ArrayAccess
 
 	public function _(string $text, array $placeHolders = [])
 	{
-		$renderer = Form::getFieldTranslator();
-
-		if ($renderer instanceof Closure)
+		if (($translator = Form::getFieldTranslator()) instanceof Closure)
 		{
-			return call_user_func_array($renderer, [$text, $placeHolders]);
+			return call_user_func_array($translator, [$text, $placeHolders]);
 		}
 
 		if ($placeHolders)
