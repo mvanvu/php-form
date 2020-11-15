@@ -128,6 +128,12 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
 ### OR Operator (|)
 * {fieldName} : is not empty | {fieldName} : abc123
 
+## Filters
+```php
+    // A Php Filters native
+    // Just using the filters attributes (String or Array) like the Php Filters (see https://github.com/mvanvu/php-filters) 
+```
+
 ## Default Validations (see at path src/Rule)
 ### Confirm
 ```php
@@ -208,8 +214,7 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
 ```
 
 ### Regex 
-```php     
-    // Invalid if the value is not in the options attributes  
+```php   
     $regex = [
         'name'     => 'MyField',
         'type'     => 'TextArea',
@@ -220,6 +225,75 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
             'Regex' => 'The value must be an unsigned number',
         ],
     ];    
+```
+
+### With your custom 
+```php   
+    $switcher = [
+        'name'     => 'MyField',
+        'type'     => 'Switcher',
+        'label'    => 'My Field',        
+        'rules'    => [
+            'custom' => function ($field) {
+                $isValid = $field->isChecked();
+
+                if (!$isValid)
+                {
+                    $field->setMessage('custom', 'Please enable this field');
+                }
+
+                return $isValid;
+            },
+        ],
+    ];    
+```
+
+## Extends Field and Rule
+```php
+    // Create all your fields at src/Field, the field must be extends \MaiVu\Php\Form\Field class
+    // Create all your rules at src/Rule, the rule must be extends \MaiVu\Php\Form\Rule class
+    // if you want to use your custom namespace
+    use MaiVu\Php\Form\Form;
+    
+    Form::addFieldNamespaces('Your\Custom\NS');
+    Form::addRuleNamespaces('Your\Custom\NS');        
+```
+
+Then create your FieldClass in your namespace
+
+```php
+   namespace Your\Custom\NS;
+   use MaiVu\Php\Form\Field;
+    
+   class MyCustomField extends Field
+   {
+        public function toString()
+        {
+            return '<p>Hello World!</p>'; // Return input field
+        }    
+   }   
+    
+   // Using type => 'MyCustomField'
+    
+```
+
+Create your RuleClass in your namespace
+
+```php
+   namespace Your\Custom\NS;
+   use MaiVu\Php\Form\Rule;
+   use MaiVu\Php\Form\Field;
+    
+   class MyCustomRule extends Rule
+   {
+        public function validate(Field $field) : bool 
+        {
+            return $field->getValue() === '1'; // Value = 1 is valid or not
+        }    
+   }   
+    
+   // Using rules => ['MyCustomRule']
+    
 ```
 
 ## Testing
