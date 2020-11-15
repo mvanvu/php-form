@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
+use MaiVu\Php\Assets;
 use MaiVu\Php\Form\Field\Check;
 use MaiVu\Php\Form\Form;
 
@@ -12,12 +13,21 @@ $form = new Form(
 			'value' => uniqid(),
 		],
 		[
-			'name'        => 'checkListField',
+			'name'        => 'switcher',
+			'type'        => 'Switcher',
+			'label'       => 'Switcher',
+			'value'       => 'YES',
+			'filters'     => ['YES|NO'],
+			'description' => 'Toggle this to show/hide the Check List',
+		],
+		[
+			'name'        => 'checkList',
 			'type'        => 'CheckList',
-			'label'       => 'Check List Field',
+			'label'       => 'Check List',
 			'required'    => true,
 			'class'       => 'uk-checkbox',
 			'description' => 'This is a check list field',
+			'showOn'      => 'switcher : is checked',
 			'options'     => [
 				[
 					'value'    => 'Check 1',
@@ -37,9 +47,9 @@ $form = new Form(
 			],
 		],
 		[
-			'name'        => 'radioField',
+			'name'        => 'radio',
 			'type'        => 'Radio',
-			'label'       => 'Radio Field',
+			'label'       => 'Radio',
 			'required'    => true,
 			'inline'      => true,
 			'class'       => 'uk-radio',
@@ -63,9 +73,9 @@ $form = new Form(
 			],
 		],
 		[
-			'name'        => 'selectField',
+			'name'        => 'select',
 			'type'        => 'Select',
-			'label'       => 'Select Field',
+			'label'       => 'Select',
 			'class'       => 'form-control',
 			'value'       => 'optValue1',
 			'options'     => [
@@ -100,17 +110,17 @@ $form = new Form(
 			'description' => 'This is a select field',
 		],
 		[
-			'name'        => 'emailField',
+			'name'        => 'email',
 			'type'        => 'Email',
-			'label'       => 'Email Field',
+			'label'       => 'Email',
 			'class'       => 'form-control',
 			'hint'        => 'Please enter a valid email',
 			'description' => 'This is a email field',
 		],
 		[
-			'name'        => 'textField',
+			'name'        => 'text',
 			'type'        => 'Text',
-			'label'       => 'Text Field',
+			'label'       => 'Text',
 			'class'       => 'form-control',
 			'value'       => 'Default text value',
 			'hint'        => 'Text placeholder',
@@ -121,36 +131,36 @@ $form = new Form(
 			'description' => 'This is a text field',
 		],
 		[
-			'name'     => 'pass1Field',
+			'name'     => 'pass1',
 			'type'     => 'Password',
 			'label'    => 'Password',
 			'class'    => 'form-control',
 			'required' => true,
 		],
 		[
-			'name'     => 'pass2Field',
+			'name'     => 'pass2',
 			'type'     => 'Password',
 			'label'    => 'Confirm password',
 			'class'    => 'form-control',
 			'required' => true,
-			'rules'    => ['Confirm:pass1Field', 'Confirm:pass1Field|2468'],
+			'rules'    => ['Confirm:pass1', 'Confirm:pass1|2468'],
 			'messages' => [
-				'Confirm:pass1Field'      => 'Password is not match!',
-				'Confirm:pass1Field|2468' => 'Password must be: 2468',
+				'Confirm:pass1'      => 'Password is not match!',
+				'Confirm:pass1|2468' => 'Password must be: 2468',
 			],
-			'showOn'   => 'pass1Field : is not empty',
+			'showOn'   => 'pass1 : is not empty',
 		],
 		[
-			'name'        => 'checkField',
+			'name'        => 'check',
 			'type'        => 'Check',
-			'label'       => 'Check Field',
+			'label'       => 'Check',
 			'checked'     => false,
 			'value'       => 'Y',
 			'filters'     => ['yesNo'],
 			'description' => 'Check this field to see the textarea',
 			'class'       => 'uk-checkbox',
 			'rules'       => [
-				'Confirm:textareaField|!',
+				'Confirm:textarea|!',
 				'checked' => function (Check $field) {
 
 					if (!($isChecked = $field->isChecked()))
@@ -162,20 +172,20 @@ $form = new Form(
 				},
 			],
 			'messages'    => [
-				'Confirm:textareaField|!' => 'The textarea must not be empty.',
+				'Confirm:textarea|!' => 'The textarea must not be empty.',
 			],
 		],
 		[
-			'name'        => 'textareaField',
+			'name'        => 'textarea',
 			'type'        => 'TextArea',
-			'label'       => 'TextArea Field',
+			'label'       => 'TextArea',
 			'class'       => 'form-control',
 			'description' => 'This is a textarea field',
 			'cols'        => 25,
 			'rows'        => 5,
 			'filters'     => ['basicHtml'],
 			'required'    => true,
-			'showOn'      => 'checkField : is checked',
+			'showOn'      => 'check : is checked',
 			'rules'       => ['MinLength:5', 'MaxLength:15'],
 			'messages'    => [
 				'MinLength:5'  => 'Min length is 5',
@@ -185,6 +195,24 @@ $form = new Form(
 	]
 );
 
+if (isset($_POST['hiddenField']))
+{
+	$form->isValid($_POST);
+}
+
+Assets::setDebugMode(true);
+Assets::addFile('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css');
+
+// UIkit 3
+// Form::setTemplate('uikit-3');
+// Assets::addFile('https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/css/uikit.min.css');
+
+// Optional Using JQuery to get a smooth show-on
+Assets::addFile('https://code.jquery.com/jquery-3.5.1.min.js');
+
+$renderForm = $form->renderHorizontal();
+Assets::compress();
+
 ?>
 
 <!DOCTYPE html>
@@ -192,26 +220,12 @@ $form = new Form(
 <head>
     <meta charset="UTF-8">
     <title>Php Form Sample</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">-->
-
-    <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/css/uikit.min.css"/>-->
+	<?php echo Assets::output('css'); ?>
 </head>
 <body>
 <div class="container uk-container uk-margin-auto mt-4 mb-4">
-	<?php
-
-	if (isset($_POST['hiddenField']))
-	{
-		$form->isValid($_POST);
-	}
-
-	?>
     <form method="post" novalidate>
-		<?php echo $form->renderHorizontal(); ?>
+		<?php echo $renderForm; ?>
         <div class="row">
             <div class="offset-sm-2 col-sm-10">
                 <button class="btn btn-primary" type="submit">
@@ -221,7 +235,7 @@ $form = new Form(
         </div>
     </form>
 </div>
-<!--<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>-->
-<script src="../assets/js/show-on.js?<?php echo time(); ?>"></script>
+
+<?php echo Assets::output('js'); ?>
 </body>
 </html>

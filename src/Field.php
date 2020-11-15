@@ -4,6 +4,7 @@ namespace MaiVu\Php\Form;
 
 use ArrayAccess;
 use Closure;
+use MaiVu\Php\Assets;
 use MaiVu\Php\Filter;
 use MaiVu\Php\Registry;
 
@@ -476,6 +477,14 @@ abstract class Field implements ArrayAccess
 			{
 				$op = '';
 			}
+		}
+
+		static $loadedShowOnJs = false;
+
+		if ($showOnData && !$loadedShowOnJs)
+		{
+			$loadedShowOnJs = true;
+			Assets::addFile(dirname(__DIR__) . '/assets/js/show-on.js');
 		}
 
 		return $showOnData;
