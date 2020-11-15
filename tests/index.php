@@ -134,7 +134,6 @@ $form = new Form(
 			'class'        => 'form-control',
 			'required'     => true,
 			'rules'        => ['Confirm:pass1Field', 'Confirm:pass1Field|2468'],
-			'confirmField' => 'pass1Field',
 			'messages'     => [
 				'Confirm:pass1Field'      => 'Password is not match!',
 				'Confirm:pass1Field|2468' => 'Password must be: 2468',

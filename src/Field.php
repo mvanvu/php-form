@@ -322,6 +322,7 @@ abstract class Field implements ArrayAccess
 		static $paths = [];
 		$options  = Form::getOptions($options);
 		$template = $options['template'];
+
 		if (!isset($paths[$template]))
 		{
 			// Default template is Bootstrap v4
@@ -341,7 +342,6 @@ abstract class Field implements ArrayAccess
 
 		$this->renderTemplate = $paths[$template];
 		$this->input          = $this->toString();
-
 
 		return $this->loadTemplate(
 			$this->renderTemplate,
