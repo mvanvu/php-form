@@ -128,6 +128,100 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
 ### OR Operator (|)
 * {fieldName} : is not empty | {fieldName} : abc123
 
+## Default Validations (see at path src/Rule)
+### Confirm
+```php
+    $password1 = [/** Password1 config data */];
+    $password2 = [
+        'name'    => 'password2',
+        'type'    => 'Text',
+        'label'   => 'My Field Label',
+        'filters' => ['basicHtml', 'trim'],
+        'rules'   => [
+            'Confirm:password1', // password2 must be match with password1,
+            'Confirm:password1:12345' // Password 2 will be valid when password1 is 12345
+        ],
+        'messages' => [
+            'Confirm:password1'       => 'The password is not match!',
+            'Confirm:password1:12345' => 'The password 1 must be 12345!',
+        ],
+    ];
+    
+```
+
+### Email
+```php    
+    // Just using Email type
+    $email = [
+        'name'     => 'Email',
+        'type'     => 'Email',
+        'label'    => 'My Email',
+        'messages' => [
+            'Email' => 'Invalid email.'
+        ],
+    ];
+
+    // OR set its rules contain Email: 'rules' => ['Email']    
+```
+
+### Date
+```php    
+    // Check the value is a valid date
+```
+
+### MinLength and MaxLength
+```php        
+    $text = [
+        'name'     => 'MyField',
+        'type'     => 'TextArea',
+        'label'    => 'My Field',
+        'rules'    => ['MinLength:5', 'MaxLength:15'],
+        'messages' => [
+            'MinLength:5'  => 'Minimum is 5 chars.',
+            'MaxLength:15' => 'Maximum is 15 chars.'
+        ],
+    ];    
+```
+
+### Options 
+```php     
+    // Invalid if the value is not in the options attributes  
+    $select = [
+        'name'     => 'MyField',
+        'type'     => 'Select',
+        'label'    => 'My Field',
+        'options'  => [
+            [
+                'value' => '1',
+                'text'  => 'Yes',
+            ],
+            [
+                'value' => '0',
+                'text'  => 'No',
+            ],
+        ],
+        'rules'    => ['Options'],
+        'messages' => [
+            'Options' => 'The value not found.', // Invalid if the value is not (1 or 0)           
+        ],
+    ];    
+```
+
+### Regex 
+```php     
+    // Invalid if the value is not in the options attributes  
+    $regex = [
+        'name'     => 'MyField',
+        'type'     => 'TextArea',
+        'label'    => 'My Field',        
+        'rules'    => ['Regex'],
+        'regex'    => '[0-9]+',
+        'messages' => [
+            'Regex' => 'The value must be an unsigned number',
+        ],
+    ];    
+```
+
 ## Testing
 
 1 - Clone this repo:
