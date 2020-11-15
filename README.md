@@ -110,6 +110,24 @@ Show or hide the base field in the conditions (like Joomla! CMS Form)
 
 ```
 
+## Show on values
+### Formats: {fieldName} = the name of field
+
+* {fieldName} : is checked // Show when the {fieldName} is checked
+* {fieldName} : is not checked // Show when the {fieldName} is not checked
+* {fieldName} : is selected // Show when the {fieldName} is selected
+* {fieldName} : is not selected // Show when the {fieldName} is not checked
+* {fieldName} : is empty // Show when the {fieldName} is empty
+* {fieldName} : is not empty // Show when the {fieldName} is not empty
+* {fieldName} : abc123 // Show when the {fieldName} has value == abc123
+* {fieldName} : !abc123 // Show when the {fieldName} has value != abc123
+
+### AND Operator (&)
+* {fieldName} : is not empty & {fieldName} : abc123
+
+### OR Operator (|)
+* {fieldName} : is not empty | {fieldName} : abc123
+
 ## Testing
 
 1 - Clone this repo:
