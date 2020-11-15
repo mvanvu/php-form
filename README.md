@@ -129,10 +129,7 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
 * {fieldName} : is not empty | {fieldName} : abc123
 
 ## Filters
-```php
-    // A Php Filters native
-    // Just using the filters attributes (String or Array) like the Php Filters (see https://github.com/mvanvu/php-filters) 
-```
+This is A Php Filters native. Just using the filters attributes (String or Array) like the Php Filters (see https://github.com/mvanvu/php-filters) 
 
 ## Default Validations (see at path src/Rule)
 ### Confirm
@@ -171,9 +168,7 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
 ```
 
 ### Date
-```php    
-    // Check the value is a valid date
-```
+Check the value is a valid date
 
 ### MinLength and MaxLength
 ```php        
@@ -227,7 +222,7 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
     ];    
 ```
 
-### With your custom 
+### Custom function
 ```php   
     $switcher = [
         'name'     => 'MyField',
@@ -249,10 +244,13 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
 ```
 
 ## Extends Field and Rule
+
+Create all your fields at src/Field, the field must be extended \MaiVu\Php\Form\Field class
+Create all your rules at src/Rule, the rule must be extended \MaiVu\Php\Form\Rule class
+OR if you want to use your custom namespace
+
 ```php
-    // Create all your fields at src/Field, the field must be extends \MaiVu\Php\Form\Field class
-    // Create all your rules at src/Rule, the rule must be extends \MaiVu\Php\Form\Rule class
-    // if you want to use your custom namespace
+    
     use MaiVu\Php\Form\Form;
     
     Form::addFieldNamespaces('Your\Custom\NS');
@@ -273,7 +271,7 @@ Then create your FieldClass in your namespace
         }    
    }   
     
-   // Using type => 'MyCustomField'
+   // Usage: type => 'MyCustomField'
     
 ```
 
@@ -292,7 +290,7 @@ Create your RuleClass in your namespace
         }    
    }   
     
-   // Using rules => ['MyCustomRule']
+   // Usage: rules => ['MyCustomRule']
     
 ```
 
