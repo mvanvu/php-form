@@ -31,6 +31,33 @@ Alternatively, from the command line:
 composer require mvanvu/php-form
 ```
 
+## Testing
+
+1 - Clone this repo:
+
+`   git clone https://github.com/mvanvu/php-form.git    
+`
+
+2 - Go to the repo
+
+`
+    cd php-from
+`
+
+3 - Composer install
+
+`
+    composer install
+`
+
+4 - Run test server
+
+`
+php -S localhost:9000/tests
+`
+
+5 - Open the browser with url localhost:9000/tests
+
 ## Usage
 
 ```php
@@ -143,7 +170,7 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
 * {fieldName} : is not empty | {fieldName} : abc123
 
 ## Filters
-This is A Php Filters native. Just using the filters attributes (String or Array) like the Php Filters (see https://github.com/mvanvu/php-filters) 
+This is A Php Filters native. Just use the filters attributes (String or Array) like the Php Filters (see https://github.com/mvanvu/php-filters) 
 
 ## Default Validations (see at path src/Rule)
 ### Confirm
@@ -168,7 +195,7 @@ This is A Php Filters native. Just using the filters attributes (String or Array
 
 ### Email
 ```php    
-    // Just using Email type
+    // Just use the Email type
     $email = [
         'name'     => 'Email',
         'type'     => 'Email',
@@ -313,30 +340,3 @@ Create your RuleClass in your namespace
    // Usage: rules => ['MyCustomRule']
     
 ```
-
-## Testing
-
-1 - Clone this repo:
-
-`   git clone https://github.com/mvanvu/php-form.git    
-`
-
-2 - Go to the repo
-
-`
-    cd php-from
-`
-
-3 - Composer install
-
-`
-    composer install
-`
-
-4 - Run test server
-
-`
-php -S localhost:9000/tests
-`
-
-4 - Open the browser with url localhost:9000/tests
