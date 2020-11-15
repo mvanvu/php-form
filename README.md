@@ -2,11 +2,13 @@
 Manage the form fields in easy way. 
 
 ## Features
+
 * Render form via templates: Bootstrap (v3 and v4) and Uikit v3
 * Ability to add new custom fields
 * Ability to add new custom rules (for validation)
-* Cool feature show/hide on (must include assets/js/show-on.js)
+* Cool feature show/hide on
 * Create once and using to render HTML form and validate from the PHP server
+* Php-assets (see https://github.com/mvanvu/php-assets)
 
 ## Installation via Composer
 ```json
@@ -56,6 +58,48 @@ else
 
 ```
 
+## Show on feature
+Show or hide the base field in the conditions (like Joomla! CMS Form)
+
+``` php
+
+    use MaiVu\Php\Form\Form;
+    
+    $form = new Form(
+        [
+            [
+                'name'     => 'pass1',
+                'type'     => 'Password',
+                'label'    => 'Password',
+                'class'    => 'form-control',
+                'required' => true,
+            ],
+            [
+                'name'     => 'pass2',
+                'type'     => 'Password',
+                'label'    => 'Confirm password',
+                'class'    => 'form-control',
+                'required' => true,
+                'rules'    => ['Confirm:pass1', 'Confirm:pass1|2468'],
+                'messages' => [
+            	    'Confirm:pass1'      => 'Password is not match!',
+            	    'Confirm:pass1|2468' => 'Password must be: 2468',
+                ],
+                'showOn'   => 'pass1 : is not empty',
+            ],
+        ]
+    );
+
+    // Before render field we must include assets/js/show-on.js
+    // OR render before HTML </body> closed tag by using php-assets):
+    // use MaiVu\Php\Assets;
+    // Assets::compress();
+    // Assets::output('js');
+
+    echo $form->renderFields();
+
+```
+
 ## Testing
 
 1 - Clone this repo:
@@ -85,6 +129,7 @@ php -S localhost:9000/tests
 
 ## Default fields see at path src/Field
 
+* Switcher (must include assets/css/switcher.css if you don't use the php-assets)
 * Check
 * CheckList
 * Email
