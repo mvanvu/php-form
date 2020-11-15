@@ -8,7 +8,7 @@ Manage the form fields in easy way.
 * Cool feature show/hide on (must include assets/js/show-on.js)
 * Create once and using to render HTML form and validate from the PHP server
 
-## Installation via Composer (not yet)
+## Installation via Composer
 ```json
 {
 	"require": {
