@@ -9,13 +9,11 @@ class MinLength extends Rule
 {
 	public function validate(Field $field): bool
 	{
-		$minLength = $this->params[0];
+		return is_numeric($this->params[0]) && strlen((string) $field->getValue()) >= (int) $this->params[0];
+	}
 
-		if (is_numeric($minLength))
-		{
-			return strlen((string) $field->getValue()) >= (int) $minLength;
-		}
-
-		return false;
+	public function dataSetRules(Field $field): array
+	{
+		return is_numeric($this->params[0]) ? [$field->getName(), '>=', $this->params[0]] : [];
 	}
 }

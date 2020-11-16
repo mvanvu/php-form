@@ -8,6 +8,7 @@ Manage the form fields in easy way.
 * Ability to add new custom rules (for validation)
 * Cool feature show/hide on
 * Create once and using to render HTML form and validate from the PHP server
+* Create once and validate using Javascript and the Php server
 
 
 ## Include dependencies
@@ -136,7 +137,7 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
             	    'Confirm:pass1'      => 'Password is not match!',
             	    'Confirm:pass1|2468' => 'Password must be: 2468',
                 ],
-                'showOn'   => 'pass1 : is not empty',
+                'showOn'   => 'pass1:!',
             ],
         ]
     );
@@ -152,28 +153,85 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
 ```
 
 ## Show on values
-### Formats: {fieldName} = the name of field
+### Format: {fieldName}:{markup}
 
-* {fieldName} : is checked (Show when the {fieldName} is checked)
-* {fieldName} : is not checked (Show when the {fieldName} is not checked)
-* {fieldName} : is selected (Show when the {fieldName} is selected)
-* {fieldName} : is not selected (Show when the {fieldName} is not checked)
-* {fieldName} : is empty (Show when the {fieldName} is empty)
-* {fieldName} : is not empty (Show when the {fieldName} is not empty)
-* {fieldName} : abc123 (Show when the {fieldName} has value == abc123)
-* {fieldName} : !abc123 (Show when the {fieldName} has value != abc123)
+* {fieldName} = the name of field
+* {markup} = the format of {fieldName} value
+
+#### For eg: the {fieldName} = MyField
+Show when MyField is empty
+`
+    showOn => 'MyField:'
+`
+
+Show when MyField is not empty
+`
+    showOn => 'MyField:!'
+`
+
+Show when MyField is checked (Check Field Base)
+`
+    showOn => 'MyField:[-]'
+`
+
+Show when MyField is not checked (Check Field Base)
+`
+    showOn => 'MyField:![-]'
+`
+
+Show when MyField min length is 5
+`
+    showOn => 'MyField:>=5'
+`
+
+Show when MyField max length is 15
+`
+    showOn => 'MyField:<=15'
+`
+
+Show when MyField value is 12345
+`
+    showOn => 'MyField:12345'
+`
+
+Show when MyField value is not 12345
+`
+    showOn => 'MyField:!12345'
+`
+
+Show when MyField value in 12345 or abcxyz
+`
+    showOn => 'MyField:12345,abcxyz'
+`
+
+Show when MyField value not in 12345 or abcxyz
+`
+    showOn => 'MyField:!12345,abcxyz'
+`
 
 ### AND Operator (&)
-* {fieldName} : is not empty & {fieldName} : abc123
+Show when MyField not empty and MyField value is abc123
+
+`
+showOn => 'MyField:! & MyField:abc123'
+`
 
 ### OR Operator (|)
-* {fieldName} : is not empty | {fieldName} : abc123
+Show when MyField not empty or MyField value is abc123
+
+`
+showOn => 'MyField:! | MyField:abc123'
+`
 
 ## Filters
 This is A Php Filters native. Just use the filters attributes (String or Array) like the Php Filters (see https://github.com/mvanvu/php-filters) 
 
 ## Default Validations (see at path src/Rule)
-### Confirm
+### Javascript validators
+This works the same with Php server (add the /assets/js/rules.js or use the Php-assets by default).
+The format rule value the same with the ShowOn
+
+### Confirm: works the both Php and JS
 ```php
     $password1 = [/** Password1 config data */];
     $password2 = [
@@ -193,7 +251,7 @@ This is A Php Filters native. Just use the filters attributes (String or Array) 
     
 ```
 
-### Email
+### Email: works the both Php and JS
 ```php    
     // Just use the Email type
     $email = [
@@ -211,7 +269,7 @@ This is A Php Filters native. Just use the filters attributes (String or Array) 
 ### Date
 Check the value is a valid date
 
-### MinLength and MaxLength
+### MinLength and MaxLength: works the both Php and JS
 ```php        
     $text = [
         'name'     => 'MyField',
@@ -249,14 +307,13 @@ Check the value is a valid date
     ];    
 ```
 
-### Regex 
+### Regex : works the both Php and JS
 ```php   
     $regex = [
         'name'     => 'MyField',
         'type'     => 'TextArea',
         'label'    => 'My Field',        
-        'rules'    => ['Regex'],
-        'regex'    => '[0-9]+',
+        'rules'    => ['Regex:^[0-9]+$'],
         'messages' => [
             'Regex' => 'The value must be an unsigned number',
         ],
@@ -282,6 +339,19 @@ Check the value is a valid date
             },
         ],
     ];    
+```
+
+### Default shorten alias
+* Confirm = - `rules => ['-:password1'] // The same rules => ['Confirm:password1']`
+* Email = @ `rules => ['@'] // The same rules => ['@']`
+* MinLength = >= `rules => ['>=:5'] // The same rules => ['MinLength:5']`
+* MaxLength = <= `rules => ['<=:15'] // The same rules => ['MaxLength:5']`
+* Regex = # `rules => ['#:^[0-9]$'] // The same rules => ['Regex:^[0-9]$']`
+
+### Define a custom alias
+```php
+use MaiVu\Php\Form\Rule;
+Rule::setRuleAlias('Confirm', 'a-b'); // rules => ['a-b:password1'] The same ['Confirm:password1']
 ```
 
 ## Extends Field and Rule
@@ -331,10 +401,22 @@ Create your RuleClass in your namespace
     
    class MyCustomRule extends Rule
    {
+        // Php validator
         public function validate(Field $field) : bool 
         {
             return $field->getValue() === '1'; // Value = 1 is valid or not
         }    
+        
+        // Support Javascript validator
+        // Usage rules => ['MyCustomRule:12345'] // $this->params[0] == 12345        
+        public function dataSetRules(Field $field): array
+        {           
+            $validValue = $this->params[0] ?? null;
+
+            // JS will validate the field value must be 12345
+            return [$field->getName(), '==', $validValue];
+        }
+
    }   
     
    // Usage: rules => ['MyCustomRule']

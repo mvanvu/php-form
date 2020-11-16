@@ -99,13 +99,7 @@ class Form
 
 			if ($fieldClass)
 			{
-				$field = new $fieldClass($config, $this);
-
-				if ($field instanceof Field)
-				{
-					$name                = $field->getName(true);
-					$this->fields[$name] = $field;
-				}
+				new $fieldClass($config, $this);
 			}
 		}
 	}

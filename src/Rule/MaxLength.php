@@ -9,13 +9,11 @@ class MaxLength extends Rule
 {
 	public function validate(Field $field): bool
 	{
-		$maxLength = $this->params[0];
+		return is_numeric($this->params[0]) && strlen((string) $field->getValue()) <= (int) $this->params[0];
+	}
 
-		if (is_numeric($maxLength))
-		{
-			return strlen((string) $field->getValue()) <= (int) $maxLength;
-		}
-
-		return false;
+	public function dataSetRules(Field $field): array
+	{
+		return is_numeric($this->params[0]) ? [$field->getName(), '<=', $this->params[0]] : [];
 	}
 }

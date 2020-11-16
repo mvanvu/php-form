@@ -7,7 +7,6 @@ use MaiVu\Php\Form\Field;
  * @var array $displayData
  */
 
-
 $fieldClass = ($displayData['horizontal'] ? 'uk-form-horizontal ' : '') . 'uk-margin ' . $displayData['class'];
 
 ?>

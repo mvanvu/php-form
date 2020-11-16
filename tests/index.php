@@ -27,7 +27,7 @@ $form = new Form(
 			'required'    => true,
 			'class'       => 'uk-checkbox',
 			'description' => 'This is a check list field',
-			'showOn'      => 'switcher : is checked',
+			'showOn'      => 'switcher:[x]',
 			'options'     => [
 				[
 					'value'    => 'Check 1',
@@ -116,6 +116,7 @@ $form = new Form(
 			'class'       => 'form-control',
 			'hint'        => 'Please enter a valid email',
 			'description' => 'This is a email field',
+			'required'    => true,
 		],
 		[
 			'name'        => 'text',
@@ -148,7 +149,6 @@ $form = new Form(
 				'Confirm:pass1'      => 'Password is not match!',
 				'Confirm:pass1|2468' => 'Password must be: 2468',
 			],
-			'showOn'   => 'pass1 : is not empty',
 		],
 		[
 			'name'        => 'check',
@@ -157,22 +157,23 @@ $form = new Form(
 			'checked'     => false,
 			'value'       => 'Y',
 			'filters'     => ['yesNo'],
-			'description' => 'Check this field to see the textarea',
+			'description' => 'Check this field and enter the password to see the textarea',
 			'class'       => 'uk-checkbox',
 			'rules'       => [
-				'Confirm:textarea|!',
-				'checked' => function (Check $field) {
+				'-:textarea|!',
+				'custom' => function (Check $field) {
 
 					if (!($isChecked = $field->isChecked()))
 					{
-						$field->setMessage('checked', 'You must check on this field.');
+						$field->setMessage('custom', 'You must check on this field.');
 					}
 
 					return $isChecked;
 				},
 			],
 			'messages'    => [
-				'Confirm:textarea|!' => 'The textarea must not be empty.',
+				'-:textarea|!' => 'The textarea must not be empty.',
+				'custom'       => 'You must check on this field.'
 			],
 		],
 		[
@@ -185,11 +186,12 @@ $form = new Form(
 			'rows'        => 5,
 			'filters'     => ['basicHtml'],
 			'required'    => true,
-			'showOn'      => 'check : is checked',
-			'rules'       => ['MinLength:5', 'MaxLength:15'],
+			'showOn'      => 'check:[-] & pass1:!',
+			'rules'       => ['>=:5', '<=:15', '#:^[0-9a-zA-Z]+$'],
 			'messages'    => [
-				'MinLength:5'  => 'Min length is 5',
-				'MaxLength:15' => 'Max length is 15',
+				'>=:5'             => 'Min length is 5',
+				'<=:15'            => 'Max length is 15',
+				'#:^[0-9a-zA-Z]+$' => 'Must be alpha num!',
 			],
 		],
 	]

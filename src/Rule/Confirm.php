@@ -3,48 +3,79 @@
 namespace MaiVu\Php\Form\Rule;
 
 use MaiVu\Php\Form\Field;
-use MaiVu\Php\Form\Field\Check;
 use MaiVu\Php\Form\Rule;
 
 class Confirm extends Rule
 {
 	public function validate(Field $field): bool
 	{
-		if (!($form = $field->getForm()))
+		if ($form = $field->getForm())
 		{
-			return false;
-		}
-
-		if ($params = $this->params->toArray())
-		{
-			$key   = array_keys($params)[0];
-			$value = $params[$key];
-
-			if (is_string($key) && ($confirmField = $form->getField($key)))
+			if (isset($this->params[1]))
 			{
-				if (in_array($value, ['', '!']))
+				$name  = $this->params[0];
+				$value = $this->params[1];
+
+				if ($target = $form->getField($name))
 				{
-					$isEmpty = empty($confirmField->getValue());
+					if (in_array($value, ['', '!']))
+					{
+						$isEmpty = empty($target->getValue());
 
-					return ('' == $value && $isEmpty) || ('!' == $value && !$isEmpty);
+						return ('' == $value && $isEmpty) || ('!' == $value && !$isEmpty);
+					}
+
+					if (in_array($value, ['x', '!x']))
+					{
+						$isChecked = $target->get('checked', false);
+
+						return ('x' == $value && $isChecked) || ('!x' == $value && !$isChecked);
+					}
+
+					return $target->getValue() == $value;
 				}
-
-				if ($confirmField instanceof Check && in_array($value, ['[checked]', '[!checked]']))
-				{
-					$isChecked = $confirmField->isChecked();
-
-					return ('[checked]' == $value && $isChecked) || ('[!checked]' == $value && !$isChecked);
-				}
-
-				return $confirmField->getValue() == $value;
 			}
 
-			if ($confirmField = $form->getField($value))
+			if (isset($this->params[0]) && ($target = $form->getField($this->params[0])))
 			{
-				return $confirmField->getValue() == $field->getValue();
+				return $target->getValue() == $field->getValue();
 			}
 		}
 
 		return false;
+	}
+
+	public function dataSetRules(Field $field): array
+	{
+		if ($form = $field->getForm())
+		{
+			if (isset($this->params[1]))
+			{
+				$name  = $this->params[0];
+				$value = $this->params[1];
+
+				if ($target = $form->getField($name))
+				{
+					if (in_array($value, ['', '!', '[-]', '![-]']))
+					{
+						$op    = $value;
+						$value = '';
+					}
+					else
+					{
+						$op = '==';
+					}
+
+					return [$target->getName(), $op, $value];
+				}
+			}
+
+			if (isset($this->params[0]) && ($target = $form->getField($this->params[0])))
+			{
+				return [$field->getName(), '$', '[name^=' . $target->getName() . ']'];
+			}
+		}
+
+		return [];
 	}
 }

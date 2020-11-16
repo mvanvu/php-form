@@ -48,8 +48,6 @@ abstract class Field implements ArrayAccess
 
 	protected $value = null;
 
-	protected $regex = null;
-
 	protected $translate = false;
 
 	protected $language = '*';
@@ -62,17 +60,27 @@ abstract class Field implements ArrayAccess
 
 	public function __construct($config, Form $form = null)
 	{
+		$this->load($config);
+
 		if ($form)
 		{
-			$this->setForm($form);
+			$form->addField($this);
 		}
-
-		$this->load($config);
 	}
 
 	public function load($config)
 	{
-		$config = (new Registry($config))->toArray();
+		$config = array_merge(
+			[
+				'name'           => null,
+				'label'          => null,
+				'required'       => false,
+				'dataAttributes' => [],
+				'messages'       => [],
+				'rules'          => [],
+			],
+			Registry::parseData($config)
+		);
 
 		foreach ($config as $k => $v)
 		{
@@ -143,25 +151,29 @@ abstract class Field implements ArrayAccess
 
 		$ruleClass = null;
 		$rawName   = $rule;
+		$aliases   = Rule::getRuleAliases();
 		$params    = [];
 
-		if (false !== strpos($rule, ':'))
+		if (false === strpos($rawName, ':'))
 		{
-			$params = explode(':', $rule);
-			$rule   = $params[0];
-			array_shift($params);
-			$tmp = [];
+			$rule = $aliases[$rule] ?? $rule;
+		}
+		else
+		{
+			list($rule, $params) = explode(':', $rawName, 2);
+			$rule = $aliases[$rule] ?? $rule;
+			$tmp  = [];
 
-			foreach ($params as $param)
+			foreach (explode('|', $params) as $param)
 			{
-				if (false === strpos($param, '|'))
+				if (false === strpos($param, '='))
 				{
 					$tmp[] = $param;
 				}
 				else
 				{
-					$part          = explode('|', $param, 2);
-					$tmp[$part[0]] = $part[1];
+					list($k, $v) = explode('=', $param, 2);
+					$tmp[$k] = $v;
 				}
 			}
 
@@ -192,6 +204,23 @@ abstract class Field implements ArrayAccess
 			{
 				$this->rules[$rawName] = $ruleObj;
 			}
+		}
+
+		return $this;
+	}
+
+	public function setDataAttributes($value)
+	{
+		$this->dataAttributes = array_merge($this->dataAttributes, (array) $value);
+
+		return $this;
+	}
+
+	public function addDataSetRules(array $dataSet)
+	{
+		if (count($dataSet) >= 3)
+		{
+			$this->dataAttributes['rules'][] = $dataSet;
 		}
 
 		return $this;
@@ -248,26 +277,14 @@ abstract class Field implements ArrayAccess
 
 	public function isValid()
 	{
-		$defaultMessages     = Form::getOptions()['messages'];
 		$value               = $this->getValue();
 		$isValid             = true;
 		$this->errorMessages = [];
-		$placeHolders        = [
-			'field' => $this->_($this->label ?: $this->name),
-		];
 
 		if ($this->required && ($value != '0' && empty($value)))
 		{
-			$isValid = false;
-
-			if (isset($this->messages['requireMessage']))
-			{
-				$this->errorMessages[] = $this->_($this->messages['requireMessage'], $placeHolders);
-			}
-			else
-			{
-				$this->errorMessages[] = $this->_($defaultMessages['required'], $placeHolders);
-			}
+			$isValid               = false;
+			$this->errorMessages[] = $this->getRuleMessage('required');
 		}
 
 		if (count($this->rules))
@@ -292,21 +309,28 @@ abstract class Field implements ArrayAccess
 
 				if (!$result)
 				{
-					$isValid = false;
-
-					if (isset($this->messages[$ruleName]))
-					{
-						$this->errorMessages[] = $this->_($this->messages[$ruleName], $placeHolders);
-					}
-					else
-					{
-						$this->errorMessages[] = $this->_($defaultMessages['invalid'], $placeHolders);
-					}
+					$isValid               = false;
+					$this->errorMessages[] = $this->getRuleMessage($ruleName);
 				}
 			}
 		}
 
 		return $isValid;
+	}
+
+	protected function getRuleMessage($ruleName)
+	{
+		$default      = Form::getOptions()['messages'];
+		$placeHolders = [
+			'field' => $this->_($this->label ?: $this->name),
+		];
+
+		if (isset($this->messages[$ruleName]))
+		{
+			return $this->_($this->messages[$ruleName], $placeHolders);
+		}
+
+		return $this->_($default[$ruleName] ?? $default['invalid'], $placeHolders);
 	}
 
 	public function _(string $text, array $placeHolders = [])
@@ -350,8 +374,54 @@ abstract class Field implements ArrayAccess
 			}
 		}
 
+		$dataAttributes    = $this->dataAttributes;
+		$hasRuleValidation = false;
+
+		if ($this->required)
+		{
+			$hasRuleValidation               = true;
+			$this->dataAttributes['rules'][] = [$this->getName(), '!', '', $this->getRuleMessage('required')];
+		}
+
+		foreach ($this->rules as $ruleName => $rule)
+		{
+			if ($rule instanceof Rule && $dataRules = $rule->dataSetRules($this))
+			{
+				$hasRuleValidation = true;
+				$ruleMsg           = $this->getRuleMessage($ruleName);
+
+				if (is_array($dataRules[0]))
+				{
+					foreach ($dataRules as $dataRule)
+					{
+						if (!isset($dataRule[3]))
+						{
+							$dataRule[3] = $ruleMsg;
+						}
+
+						$this->dataAttributes['rules'][] = $dataRule;
+					}
+				}
+				else
+				{
+					if (!isset($dataRules[3]))
+					{
+						$dataRules[3] = $ruleMsg;
+					}
+
+					$this->dataAttributes['rules'][] = $dataRules;
+				}
+			}
+		}
+
+		if ($hasRuleValidation)
+		{
+			Assets::addFile(dirname(__DIR__) . '/assets/js/rules.js');
+		}
+
 		$this->renderTemplate = $paths[$template];
 		$this->input          = $this->toString();
+		$this->dataAttributes = $dataAttributes;
 
 		return $this->loadTemplate(
 			$this->renderTemplate,
@@ -366,6 +436,23 @@ abstract class Field implements ArrayAccess
 				'required'    => $this->get('required'),
 			]
 		);
+	}
+
+	public function getName($rawName = false)
+	{
+		if ($rawName)
+		{
+			return $this->name;
+		}
+
+		return $this->renderName ?: ($this->form ? $this->form->getRenderFieldName($this->name) : $this->name);
+	}
+
+	public function setName($name)
+	{
+		$this->name = $name;
+
+		return $this;
 	}
 
 	abstract public function toString();
@@ -394,23 +481,6 @@ abstract class Field implements ArrayAccess
 		$this->id = trim($this->id, '-_');
 
 		return $this->id;
-	}
-
-	public function getName($rawName = false)
-	{
-		if ($rawName)
-		{
-			return $this->name;
-		}
-
-		return $this->renderName ?: ($this->form ? $this->form->getRenderFieldName($this->name) : $this->name);
-	}
-
-	public function setName($name)
-	{
-		$this->name = $name;
-
-		return $this;
 	}
 
 	public function getLabel()

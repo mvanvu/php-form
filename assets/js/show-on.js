@@ -3,7 +3,7 @@ window.addEventListener('load', function () {
         try {
             var showOnData = JSON.parse(field.dataset.showOn),
                 willShow = true,
-                targetField, i, n, value, values, first, op;
+                targetField, i, n, condValues, values, first, op;
             for (i = 0, n = showOnData.length; i < n; i++) {
                 op = showOnData[i].op;
 
@@ -18,65 +18,66 @@ window.addEventListener('load', function () {
                 }
 
                 if (targetField.length) {
-                    value = null;
+                    condValues = [];
+
                     if (targetField[0].nodeName === 'INPUT' && -1 !== ['radio', 'checkbox'].indexOf(targetField[0].type)) {
-                        value = [];
+                        condValues = [];
                         targetField.forEach(function () {
                             if (this.checked) {
-                                value.push(this.value);
+                                condValues.push(this.value);
                             }
                         });
 
-                        value = value.join(',');
+                    } else if (targetField[0].nodeName === 'SELECT' && targetField[0].multiple) {
+                        targetField[0].querySelectorAll('option').forEach(function (option) {
+                            if (option.selected) {
+                                condValues.push(option.value);
+                            }
+                        });
                     } else {
-                        value = targetField[0].value;
+                        condValues = targetField[0].value;
                     }
 
                     switch (showOnData[i].value) {
-                        case 'is not empty':
-                            willShow = null !== value && !!value.length;
+                        case '': // empty
+                            willShow = !condValues.length;
                             break;
 
-                        case 'is empty':
-                            willShow = null === value || !value.length;
+                        case '!': // not empty
+                            willShow = !!condValues.length;
                             break;
 
-                        case 'is not checked':
-                            willShow = !targetField[0].checked;
-                            break;
-
-                        case 'is checked':
+                        case '[-]': // checked
                             willShow = targetField[0].checked;
                             break;
 
-                        case 'is not selected':
-                            willShow = !targetField[0].selected;
-                            break;
-
-                        case 'is selected':
-                            willShow = targetField[0].selected;
+                        case '![-]': // not checked
+                            willShow = !targetField[0].checked;
                             break;
 
                         default:
-                            first = showOnData[i].value.substring(0, 1);
 
-                            if ('!' === first) {
-                                values = showOnData[i].value.substring(1);
-
-                                if (-1 === values.indexOf(',')) {
-                                    willShow = (values !== value);
-                                } else {
-                                    willShow = (values.split(',').indexOf(value) === -1);
-                                }
+                            if ('>=' === showOnData[i].value.substring(0, 2)) { // min length
+                                willShow = condValues.length >= showOnData[i].value.substring(2);
+                            } else if ('<=' === showOnData[i].value.substring(0, 2)) { // max length
+                                willShow = condValues.length <= showOnData[i].value.substring(2);
                             } else {
-                                values = showOnData[i].value;
+                                first = showOnData[i].value.substring(0, 1);
 
-                                if (-1 === values.indexOf(',')) {
-                                    willShow = (values === value);
+                                if ('!' === first) {
+                                    values = showOnData[i].value.substring(1).split(',');
                                 } else {
-                                    willShow = (values.split(',').indexOf(value) !== -1);
+                                    values = showOnData[i].value.split(',');
                                 }
 
+                                for (var j = 0, m = values.length, match; j < m; j++) {
+                                    match = condValues === values[j];
+                                    willShow = ('!' === first && !match) || ('!' !== first && match);
+
+                                    if (!willShow) {
+                                        break;
+                                    }
+                                }
                             }
 
                             break;
