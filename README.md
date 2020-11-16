@@ -11,10 +11,10 @@ Manage the form fields in easy way.
 * Create once and validate using Javascript and the Php server
 
 
-## Include dependencies
+## Included dependencies
 * Php-assets (see https://github.com/mvanvu/php-assets)
 * Php-registry (see https://github.com/mvanvu/php-registry)
-* Php-filters (see https://github.com/mvanvu/php-filters)
+* Php-filters (see https://github.com/mvanvu/php-filter)
 
 
 ## Installation via Composer
@@ -143,10 +143,10 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
     );
 
     // Before render field we must include assets/js/show-on.js
-    // OR render before HTML </body> closed tag by using php-assets):
+    // OR render before HTML </body> closed tag by using php-assets
     // use MaiVu\Php\Assets;
     // Assets::compress();
-    // Assets::output('js');
+    // echo Assets::output('js');
 
     echo $form->renderFields();
 
@@ -224,7 +224,7 @@ showOn => 'MyField:! | MyField:abc123'
 `
 
 ## Filters
-This is A Php Filters native. Just use the filters attributes (String or Array) like the Php Filters (see https://github.com/mvanvu/php-filters) 
+This is A Php Filters native. Just use the filters attributes (String or Array) like the Php Filters (see https://github.com/mvanvu/php-filter) 
 
 ## Default Validations (see at path src/Rule)
 ### Javascript validators
@@ -341,9 +341,9 @@ Check the value is a valid date
     ];    
 ```
 
-### Default shorten alias
+### Default shorten aliases
 * Confirm = - `rules => ['-:password1'] // The same rules => ['Confirm:password1']`
-* Email = @ `rules => ['@'] // The same rules => ['@']`
+* Email = @ `rules => ['@'] // The same rules => ['Email']`
 * MinLength = >= `rules => ['>=:5'] // The same rules => ['MinLength:5']`
 * MaxLength = <= `rules => ['<=:15'] // The same rules => ['MaxLength:5']`
 * Regex = # `rules => ['#:^[0-9]$'] // The same rules => ['Regex:^[0-9]$']`
@@ -407,14 +407,17 @@ Create your RuleClass in your namespace
             return $field->getValue() === '1'; // Value = 1 is valid or not
         }    
         
-        // Support Javascript validator
-        // Usage rules => ['MyCustomRule:12345'] // $this->params[0] == 12345        
+        // Support Javascript validator               
         public function dataSetRules(Field $field): array
         {           
             $validValue = $this->params[0] ?? null;
 
-            // JS will validate the field value must be 12345
-            return [$field->getName(), '==', $validValue];
+            // JS will validate this value must be 1
+            return [$field->getName(), '==', 1];
+            
+            // Or return with the warning message
+            // return [$field->getName(), '==', 1, $field->label . ' value must be 1'];
+
         }
 
    }   
