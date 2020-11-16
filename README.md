@@ -409,15 +409,29 @@ Create your RuleClass in your namespace
         
         // Support Javascript validator               
         public function dataSetRules(Field $field): array
-        {           
-            $validValue = $this->params[0] ?? null;
-
-            // JS will validate this value must be 1
+        {  
+             // JS will validate this value must be 1
             return [$field->getName(), '==', 1];
             
-            // Or return with the warning message
+            // OR custom message
             // return [$field->getName(), '==', 1, $field->label . ' value must be 1'];
+            
+            // $value = $this->params[0] ?? null; 
+            // Usage 1: rules => ['MyCustomRule:12345'] = Valid when value is 12345            
+            // Usage 2: rules => ['MyCustomRule:!12345'] = Valid when value is not 12345            
+            // return [$field->getName(), '==', $value];
+            
+            // OR empty
+            // return [$field->getName(), '', ''];
 
+            // OR not empty
+            // return [$field->getName(), '!', ''];
+            
+            // OR checked
+            // return [$field->getName(), '[-]', ''];
+            
+            // OR not checked
+            // return [$field->getName(), '![-]', ''];
         }
 
    }   
