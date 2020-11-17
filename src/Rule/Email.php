@@ -11,11 +11,4 @@ class Email extends Rule
 	{
 		return false !== filter_var($field->getValue(), FILTER_VALIDATE_EMAIL);
 	}
-
-	public function dataSetRules(Field $field): array
-	{
-		$regex = '^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$';
-
-		return [$field->getId(), '#', $regex];
-	}
 }

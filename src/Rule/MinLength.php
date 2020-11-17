@@ -26,9 +26,4 @@ class MinLength extends Rule
 
 		return false;
 	}
-
-	public function dataSetRules(Field $field): array
-	{
-		return is_numeric($this->params[0]) ? [$field->getId(), '>=', $this->params[0]] : [];
-	}
 }

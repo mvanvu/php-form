@@ -19,11 +19,4 @@ class Regex extends Rule
 
 		return 1 === @preg_match('/' . $regex . '/', (string) $value);
 	}
-
-	public function dataSetRules(Field $field): array
-	{
-		$regex = $this->params[0] ?? null;
-
-		return $regex ? [$field->getId(), '#', $regex] : [];
-	}
 }

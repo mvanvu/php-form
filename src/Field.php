@@ -151,18 +151,12 @@ abstract class Field implements ArrayAccess
 
 		$ruleClass = null;
 		$rawName   = $rule;
-		$aliases   = Rule::getRuleAliases();
 		$params    = [];
 
-		if (false === strpos($rawName, ':'))
-		{
-			$rule = $aliases[$rule] ?? $rule;
-		}
-		else
+		if (false !== strpos($rawName, ':'))
 		{
 			list($rule, $params) = explode(':', $rawName, 2);
-			$rule = $aliases[$rule] ?? $rule;
-			$tmp  = [];
+			$tmp = [];
 
 			foreach (explode('|', $params) as $param)
 			{
@@ -374,54 +368,8 @@ abstract class Field implements ArrayAccess
 			}
 		}
 
-		$dataAttributes    = $this->dataAttributes;
-		$hasRuleValidation = false;
-
-		if ($this->required)
-		{
-			$hasRuleValidation                    = true;
-			$this->dataAttributes['form-rules'][] = [$this->getName(), '!', '', $this->getRuleMessage('required')];
-		}
-
-		foreach ($this->rules as $ruleName => $rule)
-		{
-			if ($rule instanceof Rule && $dataRules = $rule->dataSetRules($this))
-			{
-				$hasRuleValidation = true;
-				$ruleMsg           = $this->getRuleMessage($ruleName);
-
-				if (is_array($dataRules[0]))
-				{
-					foreach ($dataRules as $dataRule)
-					{
-						if (!isset($dataRule[3]))
-						{
-							$dataRule[3] = $ruleMsg;
-						}
-
-						$this->dataAttributes['form-rules'][] = $dataRule;
-					}
-				}
-				else
-				{
-					if (!isset($dataRules[3]))
-					{
-						$dataRules[3] = $ruleMsg;
-					}
-
-					$this->dataAttributes['form-rules'][] = $dataRules;
-				}
-			}
-		}
-
-		if ($hasRuleValidation)
-		{
-			Assets::addFile(dirname(__DIR__) . '/assets/js/rules.js');
-		}
-
 		$this->renderTemplate = $paths[$template];
 		$this->input          = $this->toString();
-		$this->dataAttributes = $dataAttributes;
 
 		return $this->loadTemplate(
 			$this->renderTemplate,
@@ -436,23 +384,6 @@ abstract class Field implements ArrayAccess
 				'required'    => $this->get('required'),
 			]
 		);
-	}
-
-	public function getName($rawName = false)
-	{
-		if ($rawName)
-		{
-			return $this->name;
-		}
-
-		return $this->renderName ?: ($this->form ? $this->form->getRenderFieldName($this->name) : $this->name);
-	}
-
-	public function setName($name)
-	{
-		$this->name = $name;
-
-		return $this;
 	}
 
 	abstract public function toString();
@@ -481,6 +412,23 @@ abstract class Field implements ArrayAccess
 		$this->id = trim($this->id, '-_');
 
 		return $this->id;
+	}
+
+	public function getName($rawName = false)
+	{
+		if ($rawName)
+		{
+			return $this->name;
+		}
+
+		return $this->renderName ?: ($this->form ? $this->form->getRenderFieldName($this->name) : $this->name);
+	}
+
+	public function setName($name)
+	{
+		$this->name = $name;
+
+		return $this;
 	}
 
 	public function getLabel()

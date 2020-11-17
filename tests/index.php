@@ -28,7 +28,9 @@ $form = new Form(
 			'required'    => true,
 			'class'       => 'uk-checkbox',
 			'description' => 'This is a check list field',
-			'showOn'      => 'switcher:[-]',
+			//'showOn'      => 'switcher:[-]',
+			'rules'       => ['Confirm:[Check 1]'],
+			'messages'    => ['Confirm:[Check 1]' => 'Please only check: 1'],
 			'options'     => [
 				[
 					'value'    => 'Check 1',
@@ -107,7 +109,8 @@ $form = new Form(
 					],
 				],
 			],
-			'rules'       => ['Options'],
+			'rules'       => ['Options', 'Confirm:Group Label 2'],
+			'messages'    => ['Confirm:Group Label 2' => 'Please select: Group Label 2'],
 			'description' => 'This is a select field',
 		],
 		[
@@ -128,7 +131,7 @@ $form = new Form(
 			'hint'        => 'Text placeholder',
 			'required'    => true,
 			'messages'    => [
-				'requireMessage' => 'The textField is required.',
+				'required' => 'The textField is required.',
 			],
 			'description' => 'This is a text field',
 		],
@@ -145,10 +148,15 @@ $form = new Form(
 			'label'    => 'Confirm password',
 			'class'    => 'form-control',
 			'required' => true,
-			'rules'    => ['Confirm:pass1', 'Confirm:pass1|2468'],
+			'rules'    => [
+				'Confirm:pass1',
+				'Confirm:pass1|2468',
+				'Confirm:pass1|4567[when:1234]',
+			],
 			'messages' => [
-				'Confirm:pass1'      => 'Password is not match!',
-				'Confirm:pass1|2468' => 'Password must be: 2468',
+				'Confirm:pass1'                 => 'Password is not match!',
+				'Confirm:pass1|2468'            => 'Password must be: 2468',
+				'Confirm:pass1|4567[when:1234]' => 'Please, when this is 1234 then the Password must be: 4567',
 			],
 		],
 		[
@@ -161,7 +169,7 @@ $form = new Form(
 			'description' => 'Check this field and enter the password to see the textarea',
 			'class'       => 'uk-checkbox',
 			'rules'       => [
-				'-:textarea|!',
+				'Confirm:textarea|!',
 				'custom' => function (Check $field) {
 
 					if (!($isChecked = $field->isChecked()))
@@ -173,8 +181,8 @@ $form = new Form(
 				},
 			],
 			'messages'    => [
-				'-:textarea|!' => 'The textarea must not be empty.',
-				'custom'       => 'You must check on this field.'
+				'Confirm:textarea|!' => 'The textarea must not be empty.',
+				'custom'             => 'You must check on this field.',
 			],
 		],
 		[
@@ -187,12 +195,12 @@ $form = new Form(
 			'rows'        => 5,
 			'filters'     => ['basicHtml'],
 			'required'    => true,
-			'showOn'      => 'check:[-] & pass1:!',
-			'rules'       => ['>=:5', '<=:15', '#:^[0-9a-zA-Z]+$'],
+			//'showOn'      => 'check:Y & pass1:!',
+			'rules'       => ['MinLength:5', 'MaxLength:15', 'Regex:^[0-9a-zA-Z]+$'],
 			'messages'    => [
-				'>=:5'             => 'Min length is 5',
-				'<=:15'            => 'Max length is 15',
-				'#:^[0-9a-zA-Z]+$' => 'Must be alpha num!',
+				'MinLength:5'          => 'Min length is 5',
+				'MaxLength:15'         => 'Max length is 15',
+				'Regex:^[0-9a-zA-Z]+$' => 'Must be alpha num!',
 			],
 		],
 	]
