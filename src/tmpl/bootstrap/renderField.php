@@ -20,13 +20,11 @@ $fieldClass = 'form-group ' . ($displayData['horizontal'] ? 'row ' : ' ') . $dis
     <div class="<?php echo $displayData['horizontal'] ? 'col-sm-10' : 'col-form-control'; ?>">
 		<?php echo $this->input; ?>
 
-		<?php if ($displayData['errors']): ?>
-            <div id="<?php echo $displayData['id'] . '-errors-msg'; ?>">
-                <small class="form-text text-danger">
-					<?php echo implode('<br/>', $displayData['errors']); ?>
-                </small>
-            </div>
-		<?php endif; ?>
+        <div id="<?php echo $displayData['id'] . '-errors-msg'; ?>"<?php echo $displayData['errors'] ? '' : ' hidden' ?>>
+            <small class="form-text text-danger errors-msg">
+				<?php echo implode('<br/>', $displayData['errors']); ?>
+            </small>
+        </div>
 
 		<?php if ($displayData['description']): ?>
             <div id="<?php echo $displayData['id'] . '-desc'; ?>">

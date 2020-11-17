@@ -13,10 +13,15 @@ abstract class CheckBase extends OptionsBase
 		$id    = $this->getId();
 		$name  = $this->getName();
 		$value = $this->getValue();
-		$html  = '<div class="check-options-list-container"' . $this->getDataAttributesString() . '>';
+		$html  = '<div class="' . $this->checkType . '-list-field-container"' . $this->getDataAttributesString() . ' id="' . $id . '">';
 		$i     = 0;
 		settype($value, 'array');
 		$template = dirname($this->renderTemplate) . '/fields/field-check.php';
+
+		if ($this->get('multiple', false))
+		{
+			$name .= '[]';
+		}
 
 		foreach ($this->getOptions() as $option)
 		{
@@ -27,7 +32,7 @@ abstract class CheckBase extends OptionsBase
 					'labelClass' => $option['labelClass'] ?? '',
 					'class'      => $option['class'] ?? '',
 					'id'         => $id . $i++,
-					'name'       => $name . '[]',
+					'name'       => $name,
 					'type'       => $this->checkType,
 					'label'      => $this->_($option['text'] ?? ''),
 					'value'      => $inputValue,

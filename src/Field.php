@@ -379,8 +379,8 @@ abstract class Field implements ArrayAccess
 
 		if ($this->required)
 		{
-			$hasRuleValidation               = true;
-			$this->dataAttributes['rules'][] = [$this->getName(), '!', '', $this->getRuleMessage('required')];
+			$hasRuleValidation                    = true;
+			$this->dataAttributes['form-rules'][] = [$this->getName(), '!', '', $this->getRuleMessage('required')];
 		}
 
 		foreach ($this->rules as $ruleName => $rule)
@@ -399,7 +399,7 @@ abstract class Field implements ArrayAccess
 							$dataRule[3] = $ruleMsg;
 						}
 
-						$this->dataAttributes['rules'][] = $dataRule;
+						$this->dataAttributes['form-rules'][] = $dataRule;
 					}
 				}
 				else
@@ -409,7 +409,7 @@ abstract class Field implements ArrayAccess
 						$dataRules[3] = $ruleMsg;
 					}
 
-					$this->dataAttributes['rules'][] = $dataRules;
+					$this->dataAttributes['form-rules'][] = $dataRules;
 				}
 			}
 		}

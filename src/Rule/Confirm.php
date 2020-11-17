@@ -25,14 +25,14 @@ class Confirm extends Rule
 						return ('' == $value && $isEmpty) || ('!' == $value && !$isEmpty);
 					}
 
-					if (in_array($value, ['x', '!x']))
+					if (in_array($value, ['[-]', '![-]']))
 					{
 						$isChecked = $target->get('checked', false);
 
-						return ('x' == $value && $isChecked) || ('!x' == $value && !$isChecked);
+						return ('[-]' == $value && $isChecked) || ('![-]' == $value && !$isChecked);
 					}
 
-					return $target->getValue() == $value;
+					return $value === $target->getValue();
 				}
 			}
 
@@ -66,13 +66,13 @@ class Confirm extends Rule
 						$op = '==';
 					}
 
-					return [$target->getName(), $op, $value];
+					return [$target->getId(), $op, $value];
 				}
 			}
 
 			if (isset($this->params[0]) && ($target = $form->getField($this->params[0])))
 			{
-				return [$field->getName(), '$', '[name^=' . $target->getName() . ']'];
+				return [$field->getId(), '$', $target->getId()];
 			}
 		}
 

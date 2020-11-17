@@ -10,14 +10,20 @@ class Regex extends Rule
 	public function validate(Field $field): bool
 	{
 		$regex = $this->params[0] ?? null;
+		$value = $field->getValue();
 
-		return $regex && 1 === @preg_match('/' . $regex . '/', $field->getValue());
+		if (!$regex || (!is_string($value) && !is_numeric($value)))
+		{
+			return false;
+		}
+
+		return 1 === @preg_match('/' . $regex . '/', (string) $value);
 	}
 
 	public function dataSetRules(Field $field): array
 	{
 		$regex = $this->params[0] ?? null;
 
-		return $regex ? [$field->getName(), '#', $regex] : [];
+		return $regex ? [$field->getId(), '#', $regex] : [];
 	}
 }

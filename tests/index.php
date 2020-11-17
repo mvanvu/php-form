@@ -19,6 +19,7 @@ $form = new Form(
 			'value'       => 'YES',
 			'filters'     => ['YES|NO'],
 			'description' => 'Toggle this to show/hide the Check List',
+			'checked'     => true,
 		],
 		[
 			'name'        => 'checkList',
@@ -27,7 +28,7 @@ $form = new Form(
 			'required'    => true,
 			'class'       => 'uk-checkbox',
 			'description' => 'This is a check list field',
-			'showOn'      => 'switcher:[x]',
+			'showOn'      => 'switcher:[-]',
 			'options'     => [
 				[
 					'value'    => 'Check 1',
@@ -56,7 +57,7 @@ $form = new Form(
 			'description' => 'This is a radio field',
 			'options'     => [
 				[
-					'value'    => 'Radio 1',
+					'value'    => 'Check 1',
 					'text'     => 'Radio 1',
 					'readonly' => true,
 				],

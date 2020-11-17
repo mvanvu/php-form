@@ -3,62 +3,88 @@ window.addEventListener('load', function () {
         var messages = [];
 
         try {
-            var rules = JSON.parse(element.dataset.rules || '[]'),
+            var rules = JSON.parse(element.dataset.formRules || '[]'),
+                getValues = function (el) {
+                    var result = [],
+                        isMultiple = false;
+
+                    if (el.classList.contains('checkbox-list-field-container')) {
+                        isMultiple = true;
+                        el.querySelectorAll('input[type="checkbox"]:checked').forEach(function (n) {
+                            result.push(n.value);
+                        });
+                    } else if (el.classList.contains('radio-list-field-container')) {
+                        result = el.querySelector('input[type="radio"]:checked');
+                        result = result ? [result.value] : [];
+                    } else if (el.nodeName === 'SELECT') {
+                        isMultiple = !!el.multiple;
+                        el.querySelectorAll('option:checked').forEach(function (n) {
+                            result.push(n.value);
+                        });
+                    } else if (el.nodeName === 'INPUT' && (el.type === 'checkbox' || el.type === 'radio')) {
+                        result = el.checked ? [el.value] : [];
+                    } else {
+                        result = [el.value];
+                    }
+
+                    result.sort();
+
+                    return [result, isMultiple];
+                },
                 isValid = true,
-                rule, i, n, el, el2, op, value;
+                rule, i, n, el, el2, op, id, value, values, multiple;
 
             for (i = 0, n = rules.length; i < n; i++) {
                 rule = rules[i];
 
                 if (rule.length >= 4) {
-                    el = document.querySelector('[name="' + rule[0] + '"]');
+                    id = rule[0];
+                    el = document.getElementById(id);
 
                     if (el) {
-
+                        [values, multiple] = getValues(el);
                         op = rule[1];
                         value = rule[2];
 
                         switch (op) {
-                            case '$': // Query selector
-                                el2 = document.querySelector(value);
-                                isValid = (el2 && el2.value === el.value);
+                            case '$': // Confirm
+                                el2 = document.getElementById(value);
+                                isValid = el2 && JSON.stringify(getValues(el2)[0]) === JSON.stringify(values);
                                 break;
 
                             case '': // empty
-                                isValid = !el.value;
+                            case '![-]': // not checked
+                                isValid = !values.length;
                                 break;
 
                             case '!': // not empty
-                                isValid = !!el.value;
-                                break;
-
                             case '[-]': // checked
-                                isValid = !!el.checked;
-                                break;
-
-                            case '![-]': // not checked
-                                isValid = !el.checked;
+                                isValid = multiple ? !!values.length : (values.length && values[0].length);
                                 break;
 
                             case '>=': // min length
-                                isValid = el.value.length >= value;
+                                isValid = multiple ? values.length >= value : values[0].length >= value;
                                 break;
 
                             case '<=': // max length
-                                isValid = el.value.length <= value;
+                                isValid = multiple ? values.length <= value : values[0].length <= value;
                                 break;
 
                             case '#': // regex
-                                isValid = (new RegExp(value, 'g').test(el.value));
+                                isValid = values.length && (new RegExp(value, 'g').test(values[0]));
                                 break;
 
                             case '==': // equal or not
                             default:
 
-                                if ('!' === el.value.substring(0, 1)) {
-                                    isValid = el.value.substring(1).split(',').indexOf(value) === -1
+                                if (!values.length) {
+                                    isValid = false;
                                 } else {
-                                    isValid = el.value.split(',').indexOf(value) !== -1
+                                    if ('!' === value.substring(0, 1)) {
+                                        isValid = values[0] !== value.substring(1);
+                                    } else {
+                                        isValid = values[0] === value;
+                                    }
                                 }
 
                                 break;
@@ -77,9 +103,11 @@ window.addEventListener('load', function () {
 
         if (messages.length) {
             element.classList.add('invalid-field');
-            error.innerHTML = '<small class="form-text text-danger uk-form-controls-text uk-text-danger">' + messages.join('<br/>') + '</small>';
+            error.innerHTML = messages.join('<br/>');
+            error.parentNode.removeAttribute('hidden');
         } else {
             element.classList.remove('invalid-field');
+            error.parentNode.setAttribute('hidden', '');
         }
     };
 
@@ -87,16 +115,8 @@ window.addEventListener('load', function () {
         document.querySelectorAll('form:not(.has-validated)').forEach(function (form) {
             form.addEventListener('submit', function (e) {
                 form.classList.add('has-validated');
-                form.querySelectorAll('[data-rules]').forEach(function (element) {
-                    var error = document.getElementById(element.id + '-errors-msg');
-
-                    if (!error) {
-                        error = document.createElement('div');
-                        error.setAttribute('id', element.id + '-errors-msg');
-                        element.parentNode.insertBefore(error, element);
-                        error.parentNode.insertBefore(element, error);
-                    }
-
+                form.querySelectorAll('[data-form-rules]').forEach(function (element) {
+                    var error = element.parentNode.querySelector('.errors-msg');
                     error.innerHTML = '';
                     validate(element, error);
                 });

@@ -19,13 +19,11 @@ $fieldClass = ($displayData['horizontal'] ? 'uk-form-horizontal ' : '') . 'uk-ma
     <div class="uk-form-controls">
 		<?php echo $this->input; ?>
 
-		<?php if ($displayData['errors']): ?>
-            <div id="<?php echo $displayData['id'] . '-errors-msg'; ?>">
-                <small class="uk-form-controls-text uk-text-danger">
-					<?php echo implode('<br/>', $displayData['errors']); ?>
-                </small>
-            </div>
-		<?php endif; ?>
+        <div id="<?php echo $displayData['id'] . '-errors-msg'; ?>"<?php echo $displayData['errors'] ? '' : ' hidden' ?>>
+            <small class="uk-form-controls-text uk-text-danger errors-msg">
+				<?php echo implode('<br/>', $displayData['errors']); ?>
+            </small>
+        </div>
 
 		<?php if ($displayData['description']): ?>
             <div id="<?php echo $displayData['id'] . '-desc'; ?>">
