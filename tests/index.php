@@ -4,6 +4,8 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 use MaiVu\Php\Assets;
 use MaiVu\Php\Form\Field\Check;
 use MaiVu\Php\Form\Form;
+use MaiVu\Php\Registry;
+Registry::session()->start();
 
 $form = new Form(
 	[
@@ -209,6 +211,7 @@ $form = new Form(
 if (isset($_POST['hiddenField']))
 {
 	$form->isValid($_POST);
+	//!$form->isValid($_POST) && header('location: http://localhost:9000/tests'); exit(0);
 }
 
 Assets::setDebugMode(true);

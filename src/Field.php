@@ -309,6 +309,11 @@ abstract class Field implements ArrayAccess
 			}
 		}
 
+		if (!$isValid && $this->errorMessages)
+		{
+			Registry::session()->set('phpFormFieldMessage.' . $this->name, $this->errorMessages);
+		}
+
 		return $isValid;
 	}
 
@@ -441,8 +446,13 @@ abstract class Field implements ArrayAccess
 		return $this->description;
 	}
 
-	public function getErrorMessages()
+	public function getErrorMessages($flash = true)
 	{
+		if ($flash)
+		{
+			return Registry::session()->getFlash('phpFormFieldMessage.' . $this->name, $this->errorMessages);
+		}
+
 		return $this->errorMessages;
 	}
 

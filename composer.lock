@@ -121,12 +121,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/mvanvu/php-assets.git",
-                "reference": "ad5782b6468a61ad23573875106b53f9fb57119a"
+                "reference": "3fa04ed1eecd1733d14f2acd432cc0beb60d798b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mvanvu/php-assets/zipball/ad5782b6468a61ad23573875106b53f9fb57119a",
-                "reference": "ad5782b6468a61ad23573875106b53f9fb57119a",
+                "url": "https://api.github.com/repos/mvanvu/php-assets/zipball/3fa04ed1eecd1733d14f2acd432cc0beb60d798b",
+                "reference": "3fa04ed1eecd1733d14f2acd432cc0beb60d798b",
                 "shasum": ""
             },
             "require": {
@@ -163,16 +163,16 @@
         },
         {
             "name": "mvanvu/php-filter",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mvanvu/php-filter.git",
-                "reference": "ee8c4c2018aa042c8fb56f7f607729c18bf8ab25"
+                "reference": "9c9f3d55356b476af0f29f5fd7abe354337017ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mvanvu/php-filter/zipball/ee8c4c2018aa042c8fb56f7f607729c18bf8ab25",
-                "reference": "ee8c4c2018aa042c8fb56f7f607729c18bf8ab25",
+                "url": "https://api.github.com/repos/mvanvu/php-filter/zipball/9c9f3d55356b476af0f29f5fd7abe354337017ea",
+                "reference": "9c9f3d55356b476af0f29f5fd7abe354337017ea",
                 "shasum": ""
             },
             "require": {
@@ -203,26 +203,26 @@
                 "input",
                 "php"
             ],
-            "time": "2020-11-15T05:06:58+00:00"
+            "time": "2020-11-17T01:58:41+00:00"
         },
         {
             "name": "mvanvu/php-registry",
-            "version": "1.0.2",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mvanvu/php-registry.git",
-                "reference": "c2447408d81176ad9d6c9ebe1e7e27bc5f870463"
+                "reference": "948b0c08d4dc26ab5e83b09df255cf12a8fad8cd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mvanvu/php-registry/zipball/c2447408d81176ad9d6c9ebe1e7e27bc5f870463",
-                "reference": "c2447408d81176ad9d6c9ebe1e7e27bc5f870463",
+                "url": "https://api.github.com/repos/mvanvu/php-registry/zipball/948b0c08d4dc26ab5e83b09df255cf12a8fad8cd",
+                "reference": "948b0c08d4dc26ab5e83b09df255cf12a8fad8cd",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "mvanvu/php-filter": "~1.0",
-                "php": ">=5.4.0"
+                "php": ">=7.0"
             },
             "type": "php",
             "autoload": {
@@ -247,7 +247,7 @@
                 "php",
                 "registry"
             ],
-            "time": "2020-11-15T05:29:23+00:00"
+            "time": "2020-11-20T02:20:47+00:00"
         }
     ],
     "packages-dev": [],
