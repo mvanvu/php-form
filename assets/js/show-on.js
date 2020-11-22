@@ -3,7 +3,7 @@ window.addEventListener('load', function () {
         try {
             var showOnData = JSON.parse(field.dataset.showOn),
                 willShow = true,
-                targetField, i, n, condValues, values, first, op;
+                targetField, i, n, condValues, values, first, op, multiple;
             for (i = 0, n = showOnData.length; i < n; i++) {
                 op = showOnData[i].op;
 
@@ -11,6 +11,8 @@ window.addEventListener('load', function () {
                     break;
                 }
 
+                multiple = false;
+                condValues = [];
                 targetField = document.querySelectorAll('[name="' + showOnData[i].field + '"]');
 
                 if (!targetField.length) {
@@ -18,49 +20,54 @@ window.addEventListener('load', function () {
                 }
 
                 if (targetField.length) {
-                    condValues = [];
 
                     if (targetField[0].nodeName === 'INPUT' && -1 !== ['radio', 'checkbox'].indexOf(targetField[0].type)) {
-                        condValues = [];
-                        targetField.forEach(function () {
-                            if (this.checked) {
-                                condValues.push(this.value);
+                        multiple = true;
+                        targetField.forEach(function (n) {
+                            if (n.checked) {
+                                condValues.push(n.value);
                             }
                         });
 
-                    } else if (targetField[0].nodeName === 'SELECT' && targetField[0].multiple) {
-                        targetField[0].querySelectorAll('option').forEach(function (option) {
-                            if (option.selected) {
+                    } else if (targetField[0].nodeName === 'SELECT') {
+                        if (targetField[0].multiple) {
+                            multiple = true;
+                            targetField[0].querySelectorAll('option:checked').forEach(function (option) {
                                 condValues.push(option.value);
-                            }
-                        });
+                            });
+                        } else {
+                            condValues = targetField[0].querySelector('option:checked');
+                            condValues = condValues ? [condValues.value] : [];
+                        }
+
                     } else {
-                        condValues = targetField[0].value;
+                        condValues = [targetField[0].value];
                     }
 
                     switch (showOnData[i].value) {
                         case '': // empty
-                            willShow = !condValues.length;
+                            willShow = multiple ? !condValues.length : !condValues[0].length;
                             break;
 
                         case '!': // not empty
-                            willShow = !!condValues.length;
-                            break;
-
-                        case '[-]': // checked
-                            willShow = targetField[0].checked;
-                            break;
-
-                        case '![-]': // not checked
-                            willShow = !targetField[0].checked;
+                            willShow = multiple ? !!condValues.length : !!condValues[0].length;
                             break;
 
                         default:
 
-                            if ('>=' === showOnData[i].value.substring(0, 2)) { // min length
-                                willShow = condValues.length >= showOnData[i].value.substring(2);
-                            } else if ('<=' === showOnData[i].value.substring(0, 2)) { // max length
-                                willShow = condValues.length <= showOnData[i].value.substring(2);
+                            var o = showOnData[i].value.substring(0, 2);
+
+                            if ('>=' === o || '<=' === o) {
+                                if (!multiple)
+                                {
+                                    condValues = condValues.length ? condValues[0] : '';
+                                }
+
+                                if ('>=' === o) {
+                                    willShow = condValues.length >= showOnData[i].value.substring(2);
+                                } else {
+                                    willShow = condValues.length <= showOnData[i].value.substring(2);
+                                }
                             } else {
                                 first = showOnData[i].value.substring(0, 1);
 
@@ -70,13 +77,14 @@ window.addEventListener('load', function () {
                                     values = showOnData[i].value.split(',');
                                 }
 
-                                for (var j = 0, m = values.length, match; j < m; j++) {
-                                    match = condValues === values[j];
-                                    willShow = ('!' === first && !match) || ('!' !== first && match);
-
-                                    if (!willShow) {
-                                        break;
-                                    }
+                                if (multiple)
+                                {
+                                    values = JSON.stringify(values);
+                                    condValues = JSON.stringify(condValues);
+                                    willShow = ('!' === first && condValues !== values) || ('!' !== first && condValues === values);
+                                } else {
+                                    condValues = condValues.length ? condValues[0] : '';
+                                    willShow = ('!' === first && -1 === values.indexOf(condValues)) || ('!' !== first && -1 !== values.indexOf(condValues));
                                 }
                             }
 

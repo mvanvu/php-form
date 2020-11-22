@@ -5,6 +5,7 @@ use MaiVu\Php\Assets;
 use MaiVu\Php\Form\Field\Check;
 use MaiVu\Php\Form\Form;
 use MaiVu\Php\Registry;
+
 Registry::session()->start();
 
 $form = new Form(
@@ -29,8 +30,8 @@ $form = new Form(
 			'label'       => 'Check List',
 			'required'    => true,
 			'class'       => 'uk-checkbox',
-			'description' => 'This is a check list field',
-			//'showOn'      => 'switcher:[-]',
+			'description' => 'This is a check list field. Check on the Check 1 and Check 3 to show the radio list',
+			'showOn'      => 'switcher:YES',
 			'rules'       => ['Confirm:[Check 1]'],
 			'messages'    => ['Confirm:[Check 1]' => 'Please only check: 1'],
 			'options'     => [
@@ -59,6 +60,7 @@ $form = new Form(
 			'inline'      => true,
 			'class'       => 'uk-radio',
 			'description' => 'This is a radio field',
+			'showOn'      => 'checkList:Check 1,Check 3',
 			'options'     => [
 				[
 					'value'    => 'Check 1',
@@ -138,11 +140,12 @@ $form = new Form(
 			'description' => 'This is a text field',
 		],
 		[
-			'name'     => 'pass1',
-			'type'     => 'Password',
-			'label'    => 'Password',
-			'class'    => 'form-control',
-			'required' => true,
+			'name'        => 'pass1',
+			'type'        => 'Password',
+			'label'       => 'Password',
+			'class'       => 'form-control',
+			'description' => 'Enter the password min length >= 4 to show the confirm pass word',
+			'required'    => true,
 		],
 		[
 			'name'     => 'pass2',
@@ -150,6 +153,7 @@ $form = new Form(
 			'label'    => 'Confirm password',
 			'class'    => 'form-control',
 			'required' => true,
+			'showOn'   => 'pass1:! & pass1:>=4',
 			'rules'    => [
 				'Confirm:pass1',
 				'Confirm:pass1|2468',

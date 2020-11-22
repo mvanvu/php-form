@@ -1,8 +1,7 @@
-# Php Form Package (Warning this is still in development)
-Manage the form fields in easy way. 
+# Php Form Package
+Manage the form fields in easy way, security and cool.
 
 ## Features
-
 * Render form via templates: Bootstrap (v3 and v4) and Uikit v3
 * Ability to add new custom fields
 * Ability to add new custom rules (for validation)
@@ -15,7 +14,6 @@ Manage the form fields in easy way.
 * Php-assets (see https://github.com/mvanvu/php-assets)
 * Php-registry (see https://github.com/mvanvu/php-registry)
 * Php-filters (see https://github.com/mvanvu/php-filter)
-
 
 ## Installation via Composer
 ```json
@@ -120,11 +118,12 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
     $form = new Form(
         [
             [
-                'name'     => 'pass1',
-                'type'     => 'Password',
-                'label'    => 'Password',
-                'class'    => 'form-control',
-                'required' => true,
+                'name'        => 'pass1',
+                'type'        => 'Password',
+                'label'       => 'Password',
+                'class'       => 'form-control',
+                'description' => 'Enter the password min length >= 4 to show the confirm pass word',
+                'required'    => true,
             ],
             [
                 'name'     => 'pass2',
@@ -132,12 +131,17 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
                 'label'    => 'Confirm password',
                 'class'    => 'form-control',
                 'required' => true,
-                'rules'    => ['Confirm:pass1', 'Confirm:pass1|2468'],
-                'messages' => [
-            	    'Confirm:pass1'      => 'Password is not match!',
-            	    'Confirm:pass1|2468' => 'Password must be: 2468',
+                'showOn'   => 'pass1:! & pass1:>=4',
+                'rules'    => [
+                	'Confirm:pass1',
+                	'Confirm:pass1|2468',
+                	'Confirm:pass1|4567[when:1234]',
                 ],
-                'showOn'   => 'pass1:!',
+                'messages' => [
+                	'Confirm:pass1'                 => 'Password is not match!',
+                	'Confirm:pass1|2468'            => 'Password must be: 2468',
+                	'Confirm:pass1|4567[when:1234]' => 'Please, when this is 1234 then the Password must be: 4567',
+                ],
             ],
         ]
     );
@@ -167,16 +171,6 @@ Show when MyField is empty
 Show when MyField is not empty
 `
     showOn => 'MyField:!'
-`
-
-Show when MyField is checked (Check Field Base)
-`
-    showOn => 'MyField:[-]'
-`
-
-Show when MyField is not checked (Check Field Base)
-`
-    showOn => 'MyField:![-]'
 `
 
 Show when MyField min length is 5
@@ -227,31 +221,31 @@ showOn => 'MyField:! | MyField:abc123'
 This is A Php Filters native. Just use the filters attributes (String or Array) like the Php Filters (see https://github.com/mvanvu/php-filter) 
 
 ## Default Validations (see at path src/Rule)
-### Javascript validators
-This works the same with Php server (add the /assets/js/rules.js or use the Php-assets by default).
-The format rule value the same with the ShowOn
-
-### Confirm: works the both Php and JS
+### Confirm
 ```php
     $password1 = [/** Password1 config data */];
     $password2 = [
-        'name'    => 'password2',
-        'type'    => 'Text',
-        'label'   => 'My Field Label',
-        'filters' => ['basicHtml', 'trim'],
-        'rules'   => [
-            'Confirm:password1', // password2 must be match with password1,
-            'Confirm:password1:12345' // Password 2 will be valid when password1 is 12345
+        'name'     => 'pass2',
+        'type'     => 'Password',
+        'label'    => 'Confirm password',
+        'class'    => 'form-control',
+        'required' => true,
+        'showOn'   => 'pass1:! & pass1:>=4',
+        'rules'    => [
+            'Confirm:pass1',
+            'Confirm:pass1|2468',
+            'Confirm:pass1|4567[when:1234]',
         ],
         'messages' => [
-            'Confirm:password1'       => 'The password is not match!',
-            'Confirm:password1:12345' => 'The password 1 must be 12345!',
+            'Confirm:pass1'                 => 'Password is not match!',
+            'Confirm:pass1|2468'            => 'Password must be: 2468',
+            'Confirm:pass1|4567[when:1234]' => 'Please, when this is 1234 then the Password must be: 4567',
         ],
     ];
     
 ```
 
-### Email: works the both Php and JS
+### Email
 ```php    
     // Just use the Email type
     $email = [
@@ -269,7 +263,7 @@ The format rule value the same with the ShowOn
 ### Date
 Check the value is a valid date
 
-### MinLength and MaxLength: works the both Php and JS
+### MinLength and MaxLength
 ```php        
     $text = [
         'name'     => 'MyField',
@@ -307,7 +301,7 @@ Check the value is a valid date
     ];    
 ```
 
-### Regex : works the both Php and JS
+### Regex
 ```php   
     $regex = [
         'name'     => 'MyField',
@@ -339,19 +333,6 @@ Check the value is a valid date
             },
         ],
     ];    
-```
-
-### Default shorten aliases
-* Confirm = - `rules => ['-:password1'] // The same rules => ['Confirm:password1']`
-* Email = @ `rules => ['@'] // The same rules => ['Email']`
-* MinLength = >= `rules => ['>=:5'] // The same rules => ['MinLength:5']`
-* MaxLength = <= `rules => ['<=:15'] // The same rules => ['MaxLength:5']`
-* Regex = # `rules => ['#:^[0-9]$'] // The same rules => ['Regex:^[0-9]$']`
-
-### Define a custom alias
-```php
-use MaiVu\Php\Form\Rule;
-Rule::setRuleAlias('Confirm', 'a-b'); // rules => ['a-b:password1'] The same ['Confirm:password1']
 ```
 
 ## Extends Field and Rule
@@ -405,35 +386,7 @@ Create your RuleClass in your namespace
         public function validate(Field $field) : bool 
         {
             return $field->getValue() === '1'; // Value = 1 is valid or not
-        }    
-        
-        // Support Javascript validator               
-        public function dataSetRules(Field $field): array
-        {  
-             // JS will validate this value must be 1
-            return [$field->getName(), '==', 1];
-            
-            // OR custom message
-            // return [$field->getName(), '==', 1, $field->label . ' value must be 1'];
-            
-            // $value = $this->params[0] ?? null; 
-            // Usage 1: rules => ['MyCustomRule:12345'] = Valid when value is 12345            
-            // Usage 2: rules => ['MyCustomRule:!12345'] = Valid when value is not 12345            
-            // return [$field->getName(), '==', $value];
-            
-            // OR empty
-            // return [$field->getName(), '', ''];
-
-            // OR not empty
-            // return [$field->getName(), '!', ''];
-            
-            // OR checked
-            // return [$field->getName(), '[-]', ''];
-            
-            // OR not checked
-            // return [$field->getName(), '![-]', ''];
         }
-
    }   
     
    // Usage: rules => ['MyCustomRule']
