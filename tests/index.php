@@ -133,6 +133,7 @@ $form = new Form(
 			'class'       => 'form-control',
 			'value'       => 'Default text value',
 			'hint'        => 'Text placeholder',
+			'translate'   => true,
 			'required'    => true,
 			'messages'    => [
 				'required' => 'The textField is required.',
@@ -201,6 +202,7 @@ $form = new Form(
 			'rows'        => 5,
 			'filters'     => ['basicHtml'],
 			'required'    => true,
+			'translate'   => true,
 			//'showOn'      => 'check:Y & pass1:!',
 			'rules'       => ['MinLength:5', 'MaxLength:15', 'Regex:^[0-9a-zA-Z]+$'],
 			'messages'    => [
@@ -211,6 +213,8 @@ $form = new Form(
 		],
 	]
 );
+
+$form::setOptions(['languages' => ['us' => 'en-US', 'vn' => 'vi-VN']]);
 
 if (isset($_POST['hiddenField']))
 {

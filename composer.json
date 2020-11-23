@@ -19,7 +19,8 @@
     "php": ">=7.1",
     "mvanvu/php-registry": "~1.0",
     "mvanvu/php-assets": "~1.0",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-mbstring": "*"
   },
   "autoload": {
     "psr-4": {

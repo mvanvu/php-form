@@ -5,6 +5,7 @@ Manage the form fields in easy way, security and cool.
 * Render form via templates: Bootstrap (v3 and v4) and Uikit v3
 * Ability to add new custom fields
 * Ability to add new custom rules (for validation)
+* Ability to translate the field
 * Cool feature show/hide on
 * Create once and using to render HTML form and validate from the PHP server
 * Create once and validate using Javascript and the Php server
@@ -91,6 +92,51 @@ else
 {
     echo 'Oops. The form is invalid:<br/>' . implode('<br/>', $form->getMessages());
 }
+
+```
+
+## Translate the field (for multilingual purpose, include i18n.css & i18n.js)
+``` php
+use MaiVu\Php\Form\Form;
+
+// Set option languages
+Form::setOptions(
+    [
+        'languages' => [
+            // ISO code 2 => name
+            'us' => 'en-US', 
+            'vn' => 'vi-VN',
+        ]
+    ]
+);
+
+// The add set translate = true for the field
+$form = new Form(
+    [
+        [
+            'name'      => 'hello',
+            'type'      => 'Text',
+            'label'     => 'Multilingual',
+            'translate' => true,
+        ],            
+   ]
+);
+
+// Bind with translations data
+$form::bind(
+    // Fields data
+    [
+        'hello' => 'Hello world',
+    ],
+    // Translations data
+    [
+        'vi-VN' => [
+            'hello' => 'Xin chào',
+        ],
+    ]
+);
+
+echo $form->renderFields(); // See tests/index.php
 
 ```
 

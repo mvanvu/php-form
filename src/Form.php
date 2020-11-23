@@ -18,6 +18,11 @@ class Form
 			'required' => '%field% is required!',
 			'invalid'  => '%field% is invalid!',
 		],
+		'languages'       => [
+			// ISO code 2 => name
+			// 'en' => 'en-GB',
+			// 'vn' => 'vi-VN',
+		],
 	];
 
 	protected $name;
@@ -176,11 +181,11 @@ class Form
 
 	public function getRenderFieldName($fieldName, $language = null)
 	{
-		$replace   = $language ? '[translations][' . $language . ']' : '';
+		$replace   = $language ? 'i18n[' . $language . ']' : '';
 		$subject   = $this->prefixNameField . $fieldName . $this->suffixNameField;
 		$fieldName = str_replace('{replace}', $replace, $subject);
 
-		if (0 === strpos($fieldName, '['))
+		if (!$language && 0 === strpos($fieldName, '['))
 		{
 			$fieldName = trim($fieldName, '[]');
 		}
@@ -194,32 +199,6 @@ class Form
 		$field->setForm($this);
 
 		return $this;
-	}
-
-	public function renderField($name, $options = [])
-	{
-		if ($field = $this->getField($name))
-		{
-			return $field->render($options);
-		}
-
-		return null;
-	}
-
-	/**
-	 * @param $name
-	 *
-	 * @return Field | false
-	 */
-
-	public function getField($name)
-	{
-		if (isset($this->fields[$name]))
-		{
-			return $this->fields[$name];
-		}
-
-		return false;
 	}
 
 	public function getData($toArray = false)
@@ -272,10 +251,41 @@ class Form
 
 		foreach ($this->fields as $field)
 		{
-			$results[] = $field->render($options);
+			$results[] = $this->renderField($field, $options);
 		}
 
 		return implode(PHP_EOL, $results);
+	}
+
+	public function renderField($field, $options = [])
+	{
+		if (!$field instanceof Field)
+		{
+			$field = $this->getField($field);
+		}
+
+		if ($field)
+		{
+			return $field->render($options);
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param $name
+	 *
+	 * @return Field | false
+	 */
+
+	public function getField($name)
+	{
+		if (isset($this->fields[$name]))
+		{
+			return $this->fields[$name];
+		}
+
+		return false;
 	}
 
 	public function renderTemplate(string $template, bool $horizontal = false)
