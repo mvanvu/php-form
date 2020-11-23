@@ -127,12 +127,40 @@ if ($forms->isValid($_POST))
     echo 'Cool! insert the valid data to the database';   
     $validData = $forms->getData(true); // Get data as an array instead Registry
     var_dump($validData);
-
 }
 else
 {
     echo 'Oops. The form is invalid:<br/>' . implode('<br/>', $forms->getMessages());
 }
+
+```
+
+## Consider use the form with name
+
+```php
+
+use MaiVu\Php\Form\Form;
+$fieldsData = [
+    [
+        'name'  => 'hidden',
+        'type'  => 'Hidden',
+        'value' => uniqid(),		
+    ],
+];
+$form       = new Form('myForm', $fieldsData);
+
+echo $form->renderFields();
+// Will render with the form name myForm[hidden]: <input name="myForm[hidden]" type="hidden"...
+
+// Form deep name
+$form = new Form('myForm.params', $fieldsData);
+echo $form->renderFields();
+// name = myForm[params][hidden]
+
+// Form deep name
+$form = new Form('myForm.params.options', $fieldsData);
+echo $form->renderFields();
+// name = myForm[params][options][hidden]
 
 ```
 
