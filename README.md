@@ -354,7 +354,7 @@ Check the value is a valid date
         'label'    => 'My Field',        
         'rules'    => ['Regex:^[0-9]+$'],
         'messages' => [
-            'Regex' => 'The value must be an unsigned number',
+            'Regex:^[0-9]+$' => 'The value must be an unsigned number',
         ],
     ];    
 ```
