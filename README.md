@@ -8,7 +8,6 @@ Manage the form fields in easy way, security and cool.
 * Ability to translate the field
 * Cool feature show/hide on
 * Create once and using to render HTML form and validate from the PHP server
-* Create once and validate using Javascript and the Php server
 
 
 ## Included dependencies
