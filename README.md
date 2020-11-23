@@ -110,7 +110,7 @@ Form::setOptions(
     ]
 );
 
-// The add set translate = true for the field
+// Then add/set translate = true for the field
 $form = new Form(
     [
         [
