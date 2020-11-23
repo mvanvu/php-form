@@ -214,7 +214,26 @@ $form = new Form(
 	]
 );
 
-$form::setOptions(['languages' => ['us' => 'en-US', 'vn' => 'vi-VN']]);
+$form::setOptions(
+	[
+		'languages' => [
+			'us' => 'en-US',
+			'vn' => 'vi-VN',
+		],
+	]
+);
+$form->bind(
+// Fields data
+	[
+		'textarea' => 'Hello world',
+	],
+	// Translations data
+	[
+		'textarea' => [
+			'vi-VN' => 'Xin chào',
+        ],
+	]
+);
 
 if (isset($_POST['hiddenField']))
 {

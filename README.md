@@ -123,16 +123,16 @@ $form = new Form(
 );
 
 // Bind with translations data
-$form::bind(
+$form->bind(
     // Fields data
     [
         'hello' => 'Hello world',
     ],
     // Translations data
     [
-        'vi-VN' => [
-            'hello' => 'Xin chào',
-        ],
+        'hello' => [
+            'vi-VN' => 'Xin chào',
+        ],        
     ]
 );
 
