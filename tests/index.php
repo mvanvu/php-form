@@ -204,8 +204,7 @@ $form = new Form(
 			'required'    => true,
 			'translate'   => true,
 			//'showOn'      => 'check:Y & pass1:!',
-			'rules'       => ['MinLength:5', 'MaxLength:15', 'Regex:^[0-9a-zA-Z]+$'],
-			'messages'    => [
+			'rules'       => [
 				'MinLength:5'          => 'Min length is 5',
 				'MaxLength:15'         => 'Max length is 15',
 				'Regex:^[0-9a-zA-Z]+$' => 'Must be alpha num!',
@@ -234,10 +233,9 @@ $form->bind(
 	]
 );
 
-if (isset($_POST['hidden']))
+if ('POST' === $_SERVER['REQUEST_METHOD'])
 {
-	$form->isValid($_POST);
-	//!$form->isValid($_POST) && header('location: http://localhost:9000/tests'); exit(0);
+	$form->isValidRequest();
 }
 
 Assets::setDebugMode(true);

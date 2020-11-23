@@ -71,14 +71,19 @@ class FormsManager
 		return $this->messages;
 	}
 
-	public function isValid($data): bool
+	public function isValidRequest()
+	{
+		return $this->isValid($_REQUEST);
+	}
+
+	public function isValid($data, $checkFormName = true): bool
 	{
 		$isValid        = true;
 		$this->messages = [];
 
 		foreach ($this->forms as $form)
 		{
-			$filteredData = $form->bind($data);
+			$filteredData = $form->bind($data, $checkFormName);
 
 			if ($form->isValid())
 			{

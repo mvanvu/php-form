@@ -245,14 +245,19 @@ class Form
 		return $this->messages;
 	}
 
-	public function isValid($bindData = null)
+	public function isValidRequest()
+	{
+		return $this->isValid($_REQUEST);
+	}
+
+	public function isValid($bindData = null, $checkFormName = true)
 	{
 		$this->messages = [];
 		$isValid        = true;
 
 		if (null !== $bindData)
 		{
-			$this->bind($bindData);
+			$this->bind($bindData, $checkFormName);
 		}
 
 		if ($this->beforeValidation)
@@ -260,20 +265,7 @@ class Form
 			call_user_func_array($this->beforeValidation, [$this]);
 		}
 
-		/** @var Field $field */
-		foreach ($this->fields as $field)
-		{
-			if ($field->isValid())
-			{
-				// Update field data
-				$this->data->set($field->getName(true), $field->getValue());
-			}
-			else
-			{
-				$isValid        = false;
-				$this->messages = array_merge($this->messages, $field->getErrorMessages(false));
-			}
-		}
+		$this->validateFields($this->fields);
 
 		if ($this->afterValidation)
 		{
@@ -283,17 +275,16 @@ class Form
 		return $isValid;
 	}
 
-	public function bind($data)
+	public function bind($data, $checkFormName = true)
 	{
 		$languages    = static::getOptions()['languages'];
 		$registry     = new Registry($data);
+		$filteredData = new Registry;
 		$name         = $this->getName();
-		$filteredData = [];
 
-		if (false !== strpos($name, '.'))
+		if ($checkFormName && $name)
 		{
-			$dataKey  = explode('.', $name, 2)[1];
-			$registry = new Registry($registry->get($dataKey, []));
+			$registry = new Registry($registry->get($name, []));
 		}
 
 		if (count($languages) > 1)
@@ -303,15 +294,16 @@ class Form
 
 		foreach ($this->fields as $field)
 		{
-			$fieldName                = $field->getName(true);
-			$filteredData[$fieldName] = $field->applyFilters($registry->get($fieldName, null));
+			$fieldName = $field->getName(true);
+			$filteredData->set($fieldName, $field->applyFilters($registry->get($fieldName, null)));
 
-			if ($field->get('translate')
-				&& $languages
-				&& $registry->has('i18n')
-			)
+			if ($translateFields = $field->getTranslateFields())
 			{
-				$field->setTranslationData($registry->get('i18n'));
+				foreach ($translateFields as $translateField)
+				{
+					$path = 'i18n.' . $translateField->get('language') . '.' . $fieldName;
+					$filteredData->set($path, $translateField->applyFilters($registry->get($path, null)));
+				}
 			}
 		}
 
@@ -382,6 +374,29 @@ class Form
 		}
 
 		$this->name = $name;
+	}
+
+	protected function validateFields($fields)
+	{
+		/** @var Field $field */
+		foreach ($fields as $field)
+		{
+			if ($field->isValid())
+			{
+				// Update field data
+				$this->data->set($field->getName(true), $field->getValue());
+			}
+			else
+			{
+				$isValid        = false;
+				$this->messages = array_merge($this->messages, $field->getErrorMessages(false));
+			}
+
+			if ($translateFields = $field->getTranslateFields())
+			{
+				$this->validateFields($translateFields);
+			}
+		}
 	}
 
 	public function remove($fieldName)

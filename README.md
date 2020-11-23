@@ -79,7 +79,7 @@ echo $form->renderFields();
 echo $form->renderHorizontal();
 
 // Validate form
-if ($form->isValid($_POST))
+if ($form->isValidRequest()) // The same $forms->isValid($_REQUEST)
 {
     echo 'Cool! insert the valid data to the database';
     $data      = $form->getData(); // Instance of Registry
@@ -122,7 +122,7 @@ echo $forms->renderFormFields(1);
 // echo $forms->renderFormFields('form1');
 
 // Validate form
-if ($forms->isValid($_POST))
+if ($forms->isValidRequest()) // The same $forms->isValid($_REQUEST)
 {
     echo 'Cool! insert the valid data to the database';   
     $validData = $forms->getData(true); // Get data as an array instead Registry
@@ -207,6 +207,26 @@ $form->bind(
 
 echo $form->renderFields(); // See tests/index.php
 
+// By default all of translate fields are optional, no filters and no rules
+// To enable them
+
+$form = new Form(
+    [
+        [
+            'name'      => 'hello',
+            'type'      => 'Text',
+            'label'     => 'Multilingual',
+            'translate' => [
+                'required' => true,
+                'filters'  => ['string', 'trime'],
+                'rules'    => [
+                    'Confirm:abc123' => 'The multilingual must be: abc123',
+                ],
+            ],
+        ],            
+   ]
+);
+
 ```
 
 ## Default fields see at path src/Field
@@ -248,15 +268,10 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
                 'required' => true,
                 'showOn'   => 'pass1:! & pass1:>=4',
                 'rules'    => [
-                	'Confirm:pass1',
-                	'Confirm:pass1|2468',
-                	'Confirm:pass1|4567[when:1234]',
-                ],
-                'messages' => [
                 	'Confirm:pass1'                 => 'Password is not match!',
                 	'Confirm:pass1|2468'            => 'Password must be: 2468',
                 	'Confirm:pass1|4567[when:1234]' => 'Please, when this is 1234 then the Password must be: 4567',
-                ],
+                ],                
             ],
         ]
     );
@@ -347,11 +362,6 @@ This is A Php Filters native. Just use the filters attributes (String or Array) 
         'required' => true,
         'showOn'   => 'pass1:! & pass1:>=4',
         'rules'    => [
-            'Confirm:pass1',
-            'Confirm:pass1|2468',
-            'Confirm:pass1|4567[when:1234]',
-        ],
-        'messages' => [
             'Confirm:pass1'                 => 'Password is not match!',
             'Confirm:pass1|2468'            => 'Password must be: 2468',
             'Confirm:pass1|4567[when:1234]' => 'Please, when this is 1234 then the Password must be: 4567',
@@ -422,10 +432,9 @@ Check the value is a valid date
         'name'     => 'MyField',
         'type'     => 'TextArea',
         'label'    => 'My Field',        
-        'rules'    => ['Regex:^[0-9]+$'],
-        'messages' => [
+        'rules'    => [
             'Regex:^[0-9]+$' => 'The value must be an unsigned number',
-        ],
+        ],        
     ];    
 ```
 

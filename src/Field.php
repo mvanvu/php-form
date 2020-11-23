@@ -48,15 +48,16 @@ abstract class Field implements ArrayAccess
 
 	protected $value = null;
 
-	protected $translate = false;
+	protected $translate = null;
 
 	protected $language = null;
-
-	protected $translationsData = [];
 
 	protected $input = '';
 
 	protected $renderTemplate = null;
+
+
+	protected $translateFields = null;
 
 	protected $originConfigData = [];
 
@@ -94,7 +95,10 @@ abstract class Field implements ArrayAccess
 
 	public function set($attribute, $value)
 	{
-		$excludes = ['originConfigData'];
+		$excludes = [
+			'originConfigData',
+			'translateFields',
+		];
 
 		if (!in_array($attribute, $excludes) && property_exists($this, $attribute))
 		{
@@ -117,7 +121,27 @@ abstract class Field implements ArrayAccess
 
 	public function setTranslate($value)
 	{
-		$this->translate = boolval($value);
+		if (is_array($value))
+		{
+			$this->translate = [
+				'required' => boolval($value['required'] ?? false),
+				'rules'    => $value['rules'] ?? [],
+				'messages' => $value['messages'] ?? [],
+			];
+
+			if (!empty($value['filters']))
+			{
+				$this->translate['filters'] = $value['filters'];
+			}
+		}
+		elseif ($value)
+		{
+			$this->translate = [
+				'required' => false,
+				'rules'    => [],
+				'messages' => [],
+			];
+		}
 
 		return $this;
 	}
@@ -131,21 +155,31 @@ abstract class Field implements ArrayAccess
 	{
 		$this->rules = [];
 
-		foreach ($rules as $name => $rule)
+		foreach ($rules as $key => $value)
 		{
-			$this->setRule($name, $rule);
+			$this->setRule($key, $value);
 		}
 
 		return $this;
 	}
 
-	public function setRule($name, $rule)
+	protected function setRule($key, $value)
 	{
-		if ($rule instanceof Closure)
+		if ($value instanceof Closure)
 		{
-			$this->rules[$name] = $rule;
+			$this->rules[$key] = $value;
 
 			return $this;
+		}
+
+		if (is_integer($key))
+		{
+			$rule = $value;
+		}
+		else
+		{
+			$rule                 = $key;
+			$this->messages[$key] = $this->_($value);
 		}
 
 		$ruleClass = null;
@@ -202,6 +236,24 @@ abstract class Field implements ArrayAccess
 		return $this;
 	}
 
+	public function _(string $text, array $placeHolders = [])
+	{
+		if (($translator = Form::getFieldTranslator()) instanceof Closure)
+		{
+			return call_user_func_array($translator, [$text, $placeHolders]);
+		}
+
+		if ($placeHolders)
+		{
+			foreach ($placeHolders as $name => $value)
+			{
+				$text = str_replace('%' . $name . '%', $value, $text);
+			}
+		}
+
+		return $text;
+	}
+
 	public function setDataAttributes($value)
 	{
 		$this->dataAttributes = array_merge($this->dataAttributes, (array) $value);
@@ -251,9 +303,9 @@ abstract class Field implements ArrayAccess
 		return $this->filters;
 	}
 
-	public function setFilters(array $filters)
+	public function setFilters($filters)
 	{
-		$this->filters = $filters;
+		$this->filters = (array) $filters;
 
 		return $this;
 	}
@@ -300,7 +352,7 @@ abstract class Field implements ArrayAccess
 
 		if (!$isValid && $this->errorMessages)
 		{
-			Registry::session()->set('phpFormFieldMessage.' . $this->name, $this->errorMessages);
+			Registry::session()->set($this->getMessageName(), $this->errorMessages);
 		}
 
 		return $isValid;
@@ -321,22 +373,21 @@ abstract class Field implements ArrayAccess
 		return $this->_($default[$ruleName] ?? $default['invalid'], $placeHolders);
 	}
 
-	public function _(string $text, array $placeHolders = [])
+	protected function getMessageName()
 	{
-		if (($translator = Form::getFieldTranslator()) instanceof Closure)
+		$name = 'phpFormFieldMessage';
+
+		if ($this->form)
 		{
-			return call_user_func_array($translator, [$text, $placeHolders]);
+			$name .= '.' . $this->form->getName();
 		}
 
-		if ($placeHolders)
+		if ($this->language)
 		{
-			foreach ($placeHolders as $name => $value)
-			{
-				$text = str_replace('%' . $name . '%', $value, $text);
-			}
+			$name .= '.' . $this->language;
 		}
 
-		return $text;
+		return $name . '.' . $this->name;
 	}
 
 	public function render($options = [])
@@ -366,8 +417,9 @@ abstract class Field implements ArrayAccess
 		$this->renderTemplate = $paths[$template];
 		$this->input          = $this->toString();
 		$id                   = $this->getId();
+		$errors               = $this->getErrorMessages();
 
-		if ($this->get('translate') && count($languages) > 1)
+		if ($translates = $this->getTranslateFields())
 		{
 			Assets::addFiles(
 				[
@@ -380,25 +432,16 @@ abstract class Field implements ArrayAccess
 			$tabContents = ['<li class="active" id="' . $id . '">' . $this->input . '</li>'];
 			array_shift($languages);
 
-			foreach ($languages as $code2 => $language)
+			foreach ($translates as $code2 => $translate)
 			{
-				$configData = array_merge(
-					$this->get('originConfigData'),
-					[
-						'value'          => $this->translationsData[$language] ?? null,
-						'renderTemplate' => $this->renderTemplate,
-						'language'       => $language,
-					]
-				);
-
-				$form          = $this->form ? new Form($this->form->getName(), []) : null;
-				$translate     = new static($configData, $form);
 				$tabTitles[]   = '<li><a href="#' . $translate->getId() . '">' . $this->convertLanguageToFlag($code2) . '</a></li>';
 				$tabContents[] = '<li id="' . $translate->getId() . '">' . $translate->toString() . '</li>';
+				$errors        = array_merge($errors, $translate->getErrorMessages());
 			}
 
 			$this->input = '<div class="php-form-translation-field"><ul>' . implode($tabContents) . '</ul><ul>' . implode($tabTitles) . '</ul></div>';
 		}
+
 
 		return $this->loadTemplate(
 			$this->renderTemplate,
@@ -406,7 +449,7 @@ abstract class Field implements ArrayAccess
 				'id'          => $id,
 				'label'       => trim($this->getLabel()),
 				'description' => trim($this->getDescription()),
-				'errors'      => $this->getErrorMessages(),
+				'errors'      => $errors,
 				'horizontal'  => $options['layout'] === 'horizontal',
 				'showOn'      => $this->getShowOn(),
 				'class'       => 'field-' . $this->getType(),
@@ -414,7 +457,6 @@ abstract class Field implements ArrayAccess
 			]
 		);
 	}
-
 
 	abstract public function toString();
 
@@ -451,6 +493,43 @@ abstract class Field implements ArrayAccess
 		$this->name = $name;
 
 		return $this;
+	}
+
+	public function getErrorMessages($flash = true)
+	{
+		return $flash ? Registry::session()->getFlash($this->getMessageName(), $this->errorMessages) : $this->errorMessages;
+	}
+
+	public function getTranslateFields()
+	{
+		if (null === $this->translateFields)
+		{
+			$this->translateFields = [];
+			$languages             = Form::getOptions()['languages'];
+
+			if (($translate = $this->get('translate')) && count($languages) > 1)
+			{
+				array_shift($languages);
+
+				foreach ($languages as $code2 => $language)
+				{
+					$configData = array_merge(
+						$this->get('originConfigData'),
+						$translate,
+						[
+							'value'          => null,
+							'renderTemplate' => $this->renderTemplate,
+							'language'       => $language,
+						]
+					);
+
+					unset($configData['translate']);
+					$this->translateFields[$code2] = new static($configData, $this->form ? clone $this->form : null);
+				}
+			}
+		}
+
+		return $this->translateFields;
 	}
 
 	public function get($attribute, $defaultValue = null)
@@ -506,16 +585,6 @@ abstract class Field implements ArrayAccess
 	public function getDescription()
 	{
 		return $this->description;
-	}
-
-	public function getErrorMessages($flash = true)
-	{
-		if ($flash)
-		{
-			return Registry::session()->getFlash('phpFormFieldMessage.' . $this->name, $this->errorMessages);
-		}
-
-		return $this->errorMessages;
 	}
 
 	public function getShowOn()
@@ -617,43 +686,6 @@ abstract class Field implements ArrayAccess
 		$this->form = $form;
 
 		return $this;
-	}
-
-	public function setTranslationData($dataValue, $language = null)
-	{
-		if (is_array($dataValue))
-		{
-			foreach ($dataValue as $langCode => $value)
-			{
-				if (is_array($value) && array_key_exists($this->name, $value))
-				{
-					$this->translationsData[$langCode] = $this->cleanValue($value[$this->name]);
-				}
-			}
-		}
-		elseif ($language)
-		{
-			$this->translationsData[$language] = $this->cleanValue($dataValue);
-		}
-
-		return $this;
-	}
-
-	public function applyTranslationValue($language)
-	{
-		$this->setValue($this->getTranslationData($language));
-
-		return $this;
-	}
-
-	public function getTranslationData($language = null)
-	{
-		if (null === $language)
-		{
-			return $this->translationsData;
-		}
-
-		return isset($this->translationsData[$language]) ? $this->translationsData[$language] : null;
 	}
 
 	public function __get($name)

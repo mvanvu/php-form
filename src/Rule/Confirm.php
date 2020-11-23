@@ -63,45 +63,47 @@ class Confirm extends Rule
 
 	protected function parseParams(Field $field)
 	{
-		if ($form = $field->getForm())
+		if (isset($this->params[0]))
 		{
-			if (isset($this->params[0]))
+			if (isset($this->params[1]))
 			{
-				if (isset($this->params[1]))
+				if (!$form = $field->getForm())
 				{
-					$this->field = $form->getField($this->params[0]);
-					$this->value = $this->params[1];
+					return false;
 				}
-				else
+				
+				$this->field = $form->getField($this->params[0]);
+				$this->value = $this->params[1];
+			}
+			else
+			{
+				$this->field = $field;
+				$this->value = $this->params[0];
+			}
+
+			if ($this->field)
+			{
+				if (preg_match('/^(in|!in|!)?\s*\[(.+)\]$/i', $this->value, $matches))
 				{
-					$this->field = $field;
-					$this->value = $this->params[0];
+					$this->op    = $matches[1] ?: '==';
+					$this->value = explode(',', $matches[2]);
 				}
-
-				if ($this->field)
+				elseif (preg_match('/^(!?)(.*)$/i', $this->value, $matches))
 				{
-					if (preg_match('/^(in|!in|!)?\s*\[(.+)\]$/i', $this->value, $matches))
-					{
-						$this->op    = $matches[1] ?: '==';
-						$this->value = explode(',', $matches[2]);
-					}
-					elseif (preg_match('/^(!?)(.*)$/i', $this->value, $matches))
-					{
-						$this->op    = $matches[1] ?: '==';
-						$this->value = $matches[2];
-					}
-
-					$whenRegex = '/\[when:(.*)\]$/i';
-
-					if (preg_match($whenRegex, $this->value, $matches))
-					{
-						$this->isValid = ($matches[1] ?: '') != $field->getValue();
-					}
-
-					$this->value = preg_replace($whenRegex, '', $this->value);
-
-					return true;
+					$this->op    = $matches[1] ?: '==';
+					$this->value = $matches[2];
 				}
+
+				$whenRegex = '/\[when:(.*)\]$/i';
+
+				if (preg_match($whenRegex, $this->value, $matches))
+				{
+					$this->isValid = ($matches[1] ?: '') != $field->getValue();
+				}
+
+				$this->value = preg_replace($whenRegex, '', $this->value);
+
+				return true;
 			}
 		}
 
