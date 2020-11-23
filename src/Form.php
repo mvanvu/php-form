@@ -176,40 +176,6 @@ class Form
 		return $toArray ? $this->data->toArray() : $this->data;
 	}
 
-	public function getName()
-	{
-		return $this->name;
-	}
-
-	public function setName(string $name)
-	{
-		if (strpos($name, '.'))
-		{
-			$parts  = explode('.', $name);
-			$prefix = array_shift($parts) . '{replace}';
-			$count  = count($parts);
-
-			if ($count > 1)
-			{
-				$prefix .= '[' . implode('][', $parts) . ']';
-			}
-			elseif ($count === 1)
-			{
-				$prefix .= '[' . $parts[0] . ']';
-			}
-
-			$this->prefixNameField = $prefix . '[';
-			$this->suffixNameField = ']';
-		}
-		else
-		{
-			$this->prefixNameField = $name . '{replace}[';
-			$this->suffixNameField = ']';
-		}
-
-		$this->name = $name;
-	}
-
 	public function renderHorizontal()
 	{
 		return $this->renderFields(['layout' => 'horizontal']);
@@ -332,7 +298,14 @@ class Form
 	{
 		$languages    = static::getOptions()['languages'];
 		$registry     = new Registry($data);
+		$name         = $this->getName();
 		$filteredData = [];
+
+		if (false !== strpos($name, '.'))
+		{
+			$dataKey  = explode('.', $name, 2)[1];
+			$registry = new Registry($registry->get($dataKey, []));
+		}
 
 		if (count($languages) > 1)
 		{
@@ -386,6 +359,40 @@ class Form
 		}
 
 		return $result;
+	}
+
+	public function getName()
+	{
+		return $this->name;
+	}
+
+	public function setName(string $name)
+	{
+		if (strpos($name, '.'))
+		{
+			$parts  = explode('.', $name);
+			$prefix = array_shift($parts) . '{replace}';
+			$count  = count($parts);
+
+			if ($count > 1)
+			{
+				$prefix .= '[' . implode('][', $parts) . ']';
+			}
+			elseif ($count === 1)
+			{
+				$prefix .= '[' . $parts[0] . ']';
+			}
+
+			$this->prefixNameField = $prefix . '[';
+			$this->suffixNameField = ']';
+		}
+		else
+		{
+			$this->prefixNameField = $name . '{replace}[';
+			$this->suffixNameField = ']';
+		}
+
+		$this->name = $name;
 	}
 
 	public function remove($fieldName)

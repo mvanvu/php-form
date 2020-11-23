@@ -11,7 +11,7 @@ Registry::session()->start();
 $form = new Form(
 	[
 		[
-			'name'  => 'hiddenField',
+			'name'  => 'hidden',
 			'type'  => 'Hidden',
 			'value' => uniqid(),
 		],
@@ -234,8 +234,7 @@ $form->bind(
 	]
 );
 
-
-if (isset($_POST['hiddenField']))
+if (isset($_POST['hidden']))
 {
 	$form->isValid($_POST);
 	//!$form->isValid($_POST) && header('location: http://localhost:9000/tests'); exit(0);

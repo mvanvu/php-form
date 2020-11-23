@@ -142,26 +142,28 @@ else
 use MaiVu\Php\Form\Form;
 $fieldsData = [
     [
-        'name'  => 'hidden',
-        'type'  => 'Hidden',
+        'name'  => 'text',
+        'type'  => 'text',
         'value' => uniqid(),		
     ],
 ];
 $form       = new Form('myForm', $fieldsData);
 
-echo $form->renderFields();
-// Will render with the form name myForm[hidden]: <input name="myForm[hidden]" type="hidden"...
+echo $form->getField('text');
+// Will render with the form name myForm[text]: <input name="myForm[text]" type="text" value="..."/>
 
 // Form deep name
 $form = new Form('myForm.params', $fieldsData);
-echo $form->renderFields();
-// name = myForm[params][hidden]
+$form->bind(
+    [
+        'params' => [
+            'text' => 'The text value',
+        ],
+    ]
+);
 
-// Form deep name
-$form = new Form('myForm.params.options', $fieldsData);
-echo $form->renderFields();
-// name = myForm[params][options][hidden]
-
+echo $form->getField('text');
+// <input name="myForm[params][text]" type="text" value="The text value"/>
 ```
 
 ## Translate the field (for multilingual purpose, include i18n.css & i18n.js)

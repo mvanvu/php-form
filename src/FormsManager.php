@@ -73,40 +73,21 @@ class FormsManager
 
 	public function isValid($data): bool
 	{
-		$this->messages = [];
 		$isValid        = true;
-		$data           = new Registry($data);
+		$this->messages = [];
 
 		foreach ($this->forms as $form)
 		{
-			$name    = $form->getName();
-			$dataKey = null;
-
-			if (false === strpos($name, '.'))
-			{
-				$filteredData = $form->bind($data);
-			}
-			else
-			{
-				$dataKey      = explode('.', $name, 2)[1];
-				$filteredData = $form->bind($data->get($dataKey, []));
-			}
+			$filteredData = $form->bind($data);
 
 			if ($form->isValid())
 			{
-				if ($dataKey)
-				{
-					$this->data->set($dataKey, $filteredData);
-				}
-				else
-				{
-					$this->data->merge($filteredData);
-				}
+				$this->data->merge($filteredData);
 			}
 			else
 			{
-				$this->messages = array_merge($this->messages, $form->getMessages());
 				$isValid        = false;
+				$this->messages = array_merge($this->messages, $form->getMessages());
 			}
 		}
 
