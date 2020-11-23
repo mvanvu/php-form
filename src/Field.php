@@ -391,7 +391,8 @@ abstract class Field implements ArrayAccess
 					]
 				);
 
-				$translate     = new static($configData, $this->form);
+				$form          = $this->form ? new Form($this->form->getName(), []) : null;
+				$translate     = new static($configData, $form);
 				$tabTitles[]   = '<li><a href="#' . $translate->getId() . '">' . $this->convertLanguageToFlag($code2) . '</a></li>';
 				$tabContents[] = '<li id="' . $translate->getId() . '">' . $translate->toString() . '</li>';
 			}

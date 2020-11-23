@@ -41,15 +41,10 @@ class Form
 
 	protected $afterValidation = null;
 
-	public function __construct($name, $data = null, $rootKey = null)
+	public function __construct($name, $data = null)
 	{
 		if (is_array($name) || is_object($name))
 		{
-			if (null !== $data)
-			{
-				$rootKey = (string) $data;
-			}
-
 			$data = $name;
 			$name = '';
 		}
@@ -59,20 +54,13 @@ class Form
 
 		if ($data)
 		{
-			$this->load($data, $rootKey);
+			$this->load($data);
 		}
 	}
 
-	public function load($data, $rootKey = null)
+	public function load($data)
 	{
-		$data = Registry::parseData($data);
-
-		if ($rootKey && isset($data[$rootKey]))
-		{
-			$data = $data[$rootKey];
-		}
-
-		foreach ($data as $config)
+		foreach (Registry::parseData($data) as $config)
 		{
 			$this->loadField($config);
 		}
@@ -151,7 +139,8 @@ class Form
 
 	public function getRenderFieldName($fieldName, $language = null)
 	{
-		$replace   = $language ? 'i18n[' . $language . ']' : '';
+		$i18n      = $this->name ? '[i18n]' : 'i18n';
+		$replace   = $language ? $i18n . '[' . $language . ']' : '';
 		$subject   = $this->prefixNameField . $fieldName . $this->suffixNameField;
 		$fieldName = str_replace('{replace}', $replace, $subject);
 
