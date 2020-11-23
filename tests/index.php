@@ -226,12 +226,11 @@ $form->bind(
 // Fields data
 	[
 		'textarea' => 'Hello world',
-	],
-	// Translations data
-	[
-		'textarea' => [
-			'vi-VN' => 'Xin chào',
-        ],
+		'i18n'     => [
+			'vi-VN' => [
+				'textarea' => 'Xin chào',
+			],
+		],
 	]
 );
 

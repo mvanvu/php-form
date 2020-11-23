@@ -620,11 +620,14 @@ abstract class Field implements ArrayAccess
 
 	public function setTranslationData($dataValue, $language = null)
 	{
-		if (null === $language && is_array($dataValue))
+		if (is_array($dataValue))
 		{
 			foreach ($dataValue as $langCode => $value)
 			{
-				$this->translationsData[$langCode] = $this->cleanValue($value);
+				if (is_array($value) && array_key_exists($this->name, $value))
+				{
+					$this->translationsData[$langCode] = $this->cleanValue($value[$this->name]);
+				}
 			}
 		}
 		elseif ($language)

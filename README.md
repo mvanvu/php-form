@@ -122,17 +122,15 @@ $form = new Form(
 );
 
 // Bind with translations data
-$form->bind(
-    // Fields data
+$form->bind(    
     [
         'hello' => 'Hello world',
-    ],
-    // Translations data
-    [
-        'hello' => [
-            'vi-VN' => 'Xin chào',
-        ],        
-    ]
+        'i18n'  => [
+            'vi-VN' => [
+                'hello' => 'Xin chào',
+            ],
+        ],
+    ]    
 );
 
 echo $form->renderFields(); // See tests/index.php

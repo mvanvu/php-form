@@ -109,36 +109,6 @@ class Form
 		}
 	}
 
-	public static function getOptions(array $extendsOptions = [])
-	{
-		if ($extendsOptions)
-		{
-			return static::extendsOptions($extendsOptions);
-		}
-
-		return static::$options;
-	}
-
-	public static function setOptions(array $options)
-	{
-		static::$options = static::extendsOptions($options);
-	}
-
-	public static function extendsOptions(array $options)
-	{
-		$result = static::$options;
-
-		foreach ($options as $name => $value)
-		{
-			if (isset($result[$name]) && gettype($value) === gettype($result[$name]))
-			{
-				$result[$name] = is_array($value) ? array_merge($value, $result[$name]) : $value;
-			}
-		}
-
-		return $result;
-	}
-
 	public static function getFieldTranslator()
 	{
 		return static::$fieldTranslator;
@@ -358,25 +328,64 @@ class Form
 		return $isValid;
 	}
 
-	public function bind($data, array $translationsData = [])
+	public function bind($data)
 	{
+		$languages    = static::getOptions()['languages'];
 		$registry     = new Registry($data);
 		$filteredData = [];
+
+		if (count($languages) > 1)
+		{
+			array_shift($languages);
+		}
 
 		foreach ($this->fields as $field)
 		{
 			$fieldName                = $field->getName(true);
 			$filteredData[$fieldName] = $field->applyFilters($registry->get($fieldName, null));
 
-			if (isset($translationsData[$fieldName]))
+			if ($field->get('translate')
+				&& $languages
+				&& $registry->has('i18n')
+			)
 			{
-				$field->setTranslationData($translationsData[$fieldName]);
+				$field->setTranslationData($registry->get('i18n'));
 			}
 		}
 
 		$this->data->merge($filteredData);
 
 		return $filteredData;
+	}
+
+	public static function getOptions(array $extendsOptions = [])
+	{
+		if ($extendsOptions)
+		{
+			return static::extendsOptions($extendsOptions);
+		}
+
+		return static::$options;
+	}
+
+	public static function setOptions(array $options)
+	{
+		static::$options = static::extendsOptions($options);
+	}
+
+	public static function extendsOptions(array $options)
+	{
+		$result = static::$options;
+
+		foreach ($options as $name => $value)
+		{
+			if (isset($result[$name]) && gettype($value) === gettype($result[$name]))
+			{
+				$result[$name] = is_array($value) ? array_merge($value, $result[$name]) : $value;
+			}
+		}
+
+		return $result;
 	}
 
 	public function remove($fieldName)
