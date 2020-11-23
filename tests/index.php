@@ -234,6 +234,7 @@ $form->bind(
 	]
 );
 
+
 if (isset($_POST['hiddenField']))
 {
 	$form->isValid($_POST);

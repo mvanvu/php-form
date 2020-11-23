@@ -8,17 +8,45 @@ class FormsManager
 {
 	protected $forms = [];
 	protected $messages = [];
+	protected $data;
 
-	public function set($formName, Form $form)
+	public function __construct(array $forms = [])
 	{
-		$this->forms[$formName] = $form;
+		$this->data = new Registry;
+
+		if ($forms)
+		{
+			foreach ($forms as $name => $form)
+			{
+				if (is_integer($name))
+				{
+					$this->add($form);
+				}
+				else
+				{
+					$this->set($name, $form);
+				}
+			}
+		}
+	}
+
+	public function add(Form $form)
+	{
+		$this->forms[] = $form;
 
 		return $this;
 	}
 
-	public function has($formName)
+	public function set($name, Form $form)
 	{
-		return array_key_exists($formName, $this->forms);
+		$this->forms[$name] = $form;
+
+		return $this;
+	}
+
+	public function has($name)
+	{
+		return array_key_exists($name, $this->forms);
 	}
 
 	public function getForms()
@@ -26,9 +54,9 @@ class FormsManager
 		return $this->forms;
 	}
 
-	public function remove($formName)
+	public function remove($name)
 	{
-		unset($this->forms[$formName]);
+		unset($this->forms[$name]);
 
 		return $this;
 	}
@@ -43,11 +71,10 @@ class FormsManager
 		return $this->messages;
 	}
 
-	public function bind($data)
+	public function isValid($data): bool
 	{
 		$this->messages = [];
 		$isValid        = true;
-		$registry       = new Registry;
 		$data           = new Registry($data);
 
 		foreach ($this->forms as $form)
@@ -69,11 +96,11 @@ class FormsManager
 			{
 				if ($dataKey)
 				{
-					$registry->set($dataKey, $filteredData);
+					$this->data->set($dataKey, $filteredData);
 				}
 				else
 				{
-					$registry->merge($filteredData);
+					$this->data->merge($filteredData);
 				}
 			}
 			else
@@ -83,27 +110,33 @@ class FormsManager
 			}
 		}
 
-		return $isValid ? $registry->toArray() : false;
+		return $isValid;
 	}
 
-	public function renderFormFields($formName)
+	public function renderHorizontal($name, array $options = [])
 	{
-		if ($form = $this->get($formName))
+		$options['layout'] = 'horizontal';
+
+		return $this->renderFormFields($name, $options);
+	}
+
+	public function renderFormFields($name, array $options = [])
+	{
+		if ($form = $this->get($name))
 		{
-			return $form->renderFields();
+			return $form->renderFields($options);
 		}
 
 		return null;
 	}
 
-	/**
-	 * @param $formName
-	 *
-	 * @return Form|null
-	 */
-
-	public function get($formName)
+	public function get($name): ?Form
 	{
-		return $this->forms[$formName] ?? null;
+		return $this->forms[$name] ?? null;
+	}
+
+	public function getData($asArray = false)
+	{
+		return $asArray ? $this->data->toArray() : $this->data;
 	}
 }

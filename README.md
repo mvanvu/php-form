@@ -94,6 +94,48 @@ else
 
 ```
 
+## Forms manager
+Use the forms manager to manage all your forms
+
+```php
+use MaiVu\Php\Form\Form;
+use MaiVu\Php\Form\FormsManager;
+
+$fieldsData1 = [/*See tests/index.php to know how to create the fields data*/];
+$fieldsData2 = [/*See tests/index.php to know how to create the fields data*/];
+$form1 = new Form($fieldsData1);
+$form2 = new Form($fieldsData2);
+$forms = new FormsManager([$form1, $form2]);
+
+// OR
+// $forms = new FormsManager;
+// $forms->add($form1)->add($form2);
+
+echo $forms->renderFormFields(0);
+echo $forms->renderFormFields(1);
+// echo $forms->renderHorizontal(0);
+// echo $forms->renderHorizontal(1);
+
+// OR set name for the form
+// $forms->set('form1', $form1);
+// $forms->set('form2', $form2);
+// echo $forms->renderFormFields('form1');
+
+// Validate form
+if ($forms->isValid($_POST))
+{
+    echo 'Cool! insert the valid data to the database';   
+    $validData = $forms->getData(true); // Get data as an array instead Registry
+    var_dump($validData);
+
+}
+else
+{
+    echo 'Oops. The form is invalid:<br/>' . implode('<br/>', $forms->getMessages());
+}
+
+```
+
 ## Translate the field (for multilingual purpose, include i18n.css & i18n.js)
 ``` php
 use MaiVu\Php\Form\Form;
