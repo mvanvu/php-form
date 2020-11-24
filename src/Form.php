@@ -265,7 +265,7 @@ class Form
 			call_user_func_array($this->beforeValidation, [$this]);
 		}
 
-		$this->validateFields($this->fields);
+		$this->validateFields($this->fields, $isValid);
 
 		if ($this->afterValidation)
 		{
@@ -376,7 +376,7 @@ class Form
 		$this->name = $name;
 	}
 
-	protected function validateFields($fields)
+	protected function validateFields($fields, &$isValid)
 	{
 		/** @var Field $field */
 		foreach ($fields as $field)
@@ -394,7 +394,7 @@ class Form
 
 			if ($translateFields = $field->getTranslateFields())
 			{
-				$this->validateFields($translateFields);
+				$this->validateFields($translateFields, $isValid);
 			}
 		}
 	}

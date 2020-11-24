@@ -657,9 +657,7 @@ abstract class Field implements ArrayAccess
 
 	public function setShowOn($showOnData)
 	{
-		$this->showOn = str_replace(' & ', '&', trim($showOnData));
-		$this->showOn = str_replace(' | ', '|', $this->showOn);
-		$this->showOn = str_replace(' : ', ':', $this->showOn);
+		$this->showOn = preg_replace('/\s*(\&|\||:)\s*/', '${1}', trim($showOnData));
 
 		return $this;
 	}
