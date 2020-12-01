@@ -95,7 +95,7 @@ else
 ```
 
 ## Forms manager
-Use the forms manager to manage all your forms
+Using the forms manager to manage all your forms
 
 ```php
 use MaiVu\Php\Form\Form;
@@ -135,7 +135,7 @@ else
 
 ```
 
-## Consider use the form with name
+## Consider using the form with name
 
 ```php
 
@@ -144,21 +144,30 @@ $fieldsData = [
     [
         'name'  => 'text',
         'type'  => 'text',
-        'value' => uniqid(),		
+        'value' => null,		
     ],
 ];
 $form       = new Form('myForm', $fieldsData);
+$form->bind(
+    [
+        'myForm' => [
+            'text' => 'The text value',
+        ],        
+    ]
+);
 
 echo $form->getField('text');
-// Will render with the form name myForm[text]: <input name="myForm[text]" type="text" value="..."/>
+// Will render with the form name myForm[text]: <input name="myForm[text]" type="text" value="The text value"/>
 
 // Form deep name
 $form = new Form('myForm.params', $fieldsData);
 $form->bind(
     [
-        'params' => [
-            'text' => 'The text value',
-        ],
+        'myForm' => [
+            'params' => [
+                'text' => 'The text value',
+            ],
+        ],        
     ]
 );
 
