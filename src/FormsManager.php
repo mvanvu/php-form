@@ -76,20 +76,19 @@ class FormsManager
 		return $this->isValid($_REQUEST);
 	}
 
-	public function isValid($data, $checkFormName = true): bool
+	public function isValid($bindData = null, $checkFormName = true): bool
 	{
+		if (null !== $bindData)
+		{
+			$this->bind($bindData, $checkFormName);
+		}
+
 		$isValid        = true;
 		$this->messages = [];
 
 		foreach ($this->forms as $form)
 		{
-			$filteredData = $form->bind($data, $checkFormName);
-
-			if ($form->isValid())
-			{
-				$this->data->merge($filteredData);
-			}
-			else
+			if (!$form->isValid())
 			{
 				$isValid        = false;
 				$this->messages = array_merge($this->messages, $form->getMessages());
@@ -97,6 +96,16 @@ class FormsManager
 		}
 
 		return $isValid;
+	}
+
+	public function bind($data, $checkFormName = true): array
+	{
+		foreach ($this->forms as $form)
+		{
+			$this->data->merge($form->bind($data, $checkFormName));
+		}
+
+		return $this->data->toArray();
 	}
 
 	public function renderHorizontal($name, array $options = [])
