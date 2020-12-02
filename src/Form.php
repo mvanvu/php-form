@@ -43,7 +43,10 @@ class Form
 
 	public function __construct($name, $data = null)
 	{
-		if (is_array($name) || is_object($name))
+		if (is_array($name)
+			|| is_object($name)
+			|| preg_match('/\.(php|json|ini)$/', $name)
+		)
 		{
 			$data = $name;
 			$name = '';
