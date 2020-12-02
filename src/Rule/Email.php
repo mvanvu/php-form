@@ -9,6 +9,9 @@ class Email extends Rule
 {
 	public function validate(Field $field): bool
 	{
-		return false !== filter_var($field->getValue(), FILTER_VALIDATE_EMAIL);
+		$required = $field->get('required');
+		$value    = $field->getValue();
+
+		return (!$required && empty($value)) || false !== filter_var($value, FILTER_VALIDATE_EMAIL);
 	}
 }
