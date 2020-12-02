@@ -63,7 +63,7 @@ class Select extends OptionsBase
 			{
 				$optValue = (string) ($options['value'] ?? '');
 				$selected = in_array($optValue, $valueArray) ? ' selected' : '';
-				$input    .= '<option value="' . $this->renderValue($optValue) . '"' . $selected . '>' . $this->renderText($optValue) . '</option>';
+				$input    .= '<option value="' . $this->renderValue($optValue) . '"' . $selected . '>' . $this->renderText(($options['text'] ?? '')) . '</option>';
 			}
 		}
 
