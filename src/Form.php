@@ -100,6 +100,11 @@ class Form
 		}
 	}
 
+	public static function create($name, $data = null)
+	{
+		return new Form($name, $data);
+	}
+
 	public static function getFieldTranslator()
 	{
 		return static::$fieldTranslator;
