@@ -338,7 +338,24 @@ class Form
 		{
 			if (isset($result[$name]) && gettype($value) === gettype($result[$name]))
 			{
-				$result[$name] = is_array($value) ? array_merge($value, $result[$name]) : $value;
+				if (is_array($value))
+				{
+					foreach (array_reverse($value) as $k => $v)
+					{
+						if (is_integer($k))
+						{
+							array_unshift($result[$name], $v);
+						}
+						else
+						{
+							$result[$name][$k] = $v;
+						}
+					}
+				}
+				else
+				{
+					$result[$name] = $value;
+				}
 			}
 		}
 
