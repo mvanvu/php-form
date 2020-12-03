@@ -102,7 +102,16 @@ class FormsManager
 	{
 		foreach ($this->forms as $form)
 		{
-			$this->data->merge($form->bind($data, $checkFormName));
+			$formData = $form->bind($data, $checkFormName);
+
+			if ($name = $form->getName())
+			{
+				$this->data->set($name, $formData);
+			}
+			else
+			{
+				$this->data->merge($formData);
+			}
 		}
 
 		return $this->data->toArray();

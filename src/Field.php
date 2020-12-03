@@ -428,14 +428,14 @@ abstract class Field implements ArrayAccess
 				]
 			);
 
-			$tabTitles   = ['<li class="active"><a href="#' . $id . '">' . $this->convertLanguageToFlag(array_keys($languages)[0]) . '</a></li>'];
-			$tabContents = ['<li class="active" id="' . $id . '">' . $this->input . '</li>'];
+			$tabTitles   = ['<li class="active"><a href="#' . $id . '-tab">' . $this->convertLanguageToFlag(array_keys($languages)[0]) . '</a></li>'];
+			$tabContents = ['<li class="active" id="' . $id . '-tab">' . $this->input . '</li>'];
 			array_shift($languages);
 
 			foreach ($translates as $code2 => $translate)
 			{
-				$tabTitles[]   = '<li><a href="#' . $translate->getId() . '">' . $this->convertLanguageToFlag($code2) . '</a></li>';
-				$tabContents[] = '<li id="' . $translate->getId() . '">' . $translate->toString() . '</li>';
+				$tabTitles[]   = '<li><a href="#' . $translate->getId() . '-tab">' . $this->convertLanguageToFlag($code2) . '</a></li>';
+				$tabContents[] = '<li id="' . $translate->getId() . '-tab">' . $translate->toString() . '</li>';
 				$errors        = array_merge($errors, $translate->getErrorMessages());
 			}
 
