@@ -56,7 +56,6 @@ abstract class Field implements ArrayAccess
 
 	protected $renderTemplate = null;
 
-
 	protected $translateFields = null;
 
 	protected $originConfigData = [];
@@ -77,6 +76,7 @@ abstract class Field implements ArrayAccess
 			[
 				'name'           => null,
 				'label'          => null,
+				'value'          => null,
 				'required'       => false,
 				'dataAttributes' => [],
 				'messages'       => [],
@@ -85,9 +85,14 @@ abstract class Field implements ArrayAccess
 			Registry::parseData($config)
 		);
 
-		foreach ($this->originConfigData as $k => $v)
+		return $this->reset();
+	}
+
+	public function reset()
+	{
+		foreach ($this->originConfigData as $attribute => $value)
 		{
-			$this->set($k, $v);
+			$this->set($attribute, $value);
 		}
 
 		return $this;
@@ -163,9 +168,9 @@ abstract class Field implements ArrayAccess
 		return $this;
 	}
 
-	protected function setRule($key, $value)
+	public function setRule($key, $value)
 	{
-		if ($value instanceof Closure)
+		if ($value instanceof Closure || $value instanceof Rule)
 		{
 			$this->rules[$key] = $value;
 
@@ -178,8 +183,8 @@ abstract class Field implements ArrayAccess
 		}
 		else
 		{
-			$rule                 = $key;
-			$this->messages[$key] = $this->_($value);
+			$rule = $key;
+			$this->setMessage($key, $value);
 		}
 
 		$ruleClass = null;
@@ -236,22 +241,11 @@ abstract class Field implements ArrayAccess
 		return $this;
 	}
 
-	public function _(string $text, array $placeHolders = [])
+	public function setMessage($name, $value)
 	{
-		if (($translator = Form::getFieldTranslator()) instanceof Closure)
-		{
-			return call_user_func_array($translator, [$text, $placeHolders]);
-		}
+		$this->messages[$name] = (string) $value;
 
-		if ($placeHolders)
-		{
-			foreach ($placeHolders as $name => $value)
-			{
-				$text = str_replace('%' . $name . '%', $value, $text);
-			}
-		}
-
-		return $text;
+		return $this;
 	}
 
 	public function setDataAttributes($value)
@@ -371,6 +365,24 @@ abstract class Field implements ArrayAccess
 		}
 
 		return $this->_($default[$ruleName] ?? $default['invalid'], $placeHolders);
+	}
+
+	public function _(string $text, array $placeHolders = [])
+	{
+		if (($translator = Form::getFieldTranslator()) instanceof Closure)
+		{
+			return call_user_func_array($translator, [$text, $placeHolders]);
+		}
+
+		if ($placeHolders)
+		{
+			foreach ($placeHolders as $name => $value)
+			{
+				$text = str_replace('%' . $name . '%', $value, $text);
+			}
+		}
+
+		return $text;
 	}
 
 	protected function getMessageName()
@@ -719,13 +731,6 @@ abstract class Field implements ArrayAccess
 	public function offsetUnset($offset)
 	{
 		return $this->set($offset, null);
-	}
-
-	public function setMessage($name, $value)
-	{
-		$this->messages[$name] = (string) $value;
-
-		return $this;
 	}
 
 	protected function getDataAttributesString()

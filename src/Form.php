@@ -135,6 +135,16 @@ class Form
 		static::setOptions(['template' => $template, 'layout' => $layout]);
 	}
 
+	public function reset()
+	{
+		foreach ($this->fields as $field)
+		{
+			$field->reset();
+		}
+
+		return $this;
+	}
+
 	public function beforeValidation($callback)
 	{
 		$this->beforeValidation = is_callable($callback) ? $callback : null;
