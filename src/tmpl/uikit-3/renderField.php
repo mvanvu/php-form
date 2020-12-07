@@ -7,16 +7,28 @@ use MaiVu\Php\Form\Field;
  * @var array $displayData
  */
 
-$fieldClass = ($displayData['horizontal'] ? 'uk-form-horizontal ' : '') . 'uk-margin ' . $displayData['class'];
+$fieldClass = 'uk-margin ' . $displayData['class'];
+
+if ($displayData['horizontal'])
+{
+	$fieldClass .= ' uk-grid uk-grid-small';
+	$lblClass   = 'uk-width-1-4@s';
+	$ctlClass   = 'uk-width-3-4@s';
+}
+else
+{
+	$lblClass = 'uk-form-label';
+	$ctlClass = 'uk-form-controls';
+}
 
 ?>
 <div class="<?php echo $fieldClass; ?>"<?php echo $displayData['showOn'] ? ' data-show-on="' . htmlspecialchars(json_encode($displayData['showOn']), ENT_COMPAT, 'UTF-8') . '"' : ''; ?>>
 	<?php if (!empty($displayData['label'])): ?>
-        <label class="uk-form-label" for="<?php echo $displayData['id']; ?>">
+        <label class="<?php echo $lblClass; ?>" for="<?php echo $displayData['id']; ?>">
 			<?php echo $this->_($displayData['label']) . ($displayData['required'] ? '*' : ''); ?>
         </label>
 	<?php endif; ?>
-    <div class="uk-form-controls">
+    <div class="<?php echo $ctlClass; ?>">
 		<?php echo $this->input; ?>
 
         <div id="<?php echo $displayData['id'] . '-errors-msg'; ?>"<?php echo $displayData['errors'] ? '' : ' hidden' ?>>

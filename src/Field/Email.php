@@ -10,7 +10,7 @@ class Email extends Text
 
 	public function __construct($config, Form $form = null)
 	{
-		$config['rules'] = array_merge(['@'], ($config['rules'] ?? []));
+		$config['rules'] = array_merge(['Email'], ($config['rules'] ?? []));
 
 		parent::__construct($config, $form);
 	}

@@ -53,6 +53,10 @@ class InputBase extends Field
 		{
 			$input .= ' autocomplete="' . htmlspecialchars($this->autocomplete, ENT_COMPAT, 'UTF-8') . '"';
 		}
+		elseif ($this->inputType === 'password')
+		{
+			$input .= ' autocomplete="new-password"';
+		}
 
 		$this->prepareInputAttribute($input);
 

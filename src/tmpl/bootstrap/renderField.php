@@ -7,7 +7,7 @@ use MaiVu\Php\Form\Field;
  * @var array $displayData
  */
 
-$fieldClass = 'form-group ' . ($displayData['horizontal'] ? 'row ' : ' ') . $displayData['class'];
+$fieldClass = 'form-group ' . ($displayData['horizontal'] ? 'row ' : '') . $displayData['class'];
 
 ?>
 <div class="<?php echo $fieldClass; ?>"<?php echo $displayData['showOn'] ? ' data-show-on="' . htmlspecialchars(json_encode($displayData['showOn']), ENT_COMPAT, 'UTF-8') . '"' : ''; ?>>

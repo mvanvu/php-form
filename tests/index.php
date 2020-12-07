@@ -214,6 +214,35 @@ $form = new Form(
 				'Regex:^[0-9a-zA-Z]+$' => 'Must be alpha num!',
 			],
 		],
+		[
+			'name'        => 'subform',
+			'type'        => 'SubForm',
+			'label'       => 'Subform',
+			'description' => 'This is a subform',
+			'columns'     => 3,
+			'horizontal'  => false,
+			'fields'      => [
+				[
+					'name'  => 'firstName',
+					'type'  => 'Text',
+					'class' => 'form-control',
+					'hint'  => 'First name',
+				],
+				[
+					'name'  => 'lastName',
+					'type'  => 'Text',
+					'class' => 'form-control',
+					'hint'  => 'Last name',
+				],
+				[
+					'name'     => 'email',
+					'type'     => 'Email',
+					'class'    => 'form-control',
+					'hint'     => 'Enter your email',
+					'required' => true,
+				],
+			],
+		],
 	]
 );
 
@@ -247,9 +276,10 @@ if ('POST' === $_SERVER['REQUEST_METHOD'])
 Assets::setDebugMode(true);
 Assets::addFile('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css');
 
-// UIkit 3
-// Form::setTemplate('uikit-3');
-// Assets::addFile('https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/css/uikit.min.css');
+/*// UIkit 3
+Form::setTemplate('uikit-3');
+Assets::addFile('https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/css/uikit.min.css');
+Assets::addFile('https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/js/uikit.min.js');*/
 
 // Optional Using JQuery to get a smooth show-on
 Assets::addFile('https://code.jquery.com/jquery-3.5.1.min.js');
@@ -267,7 +297,7 @@ Assets::compress();
 	<?php echo Assets::output('css'); ?>
 </head>
 <body>
-<div class="container uk-container uk-margin-auto mt-4 mb-4">
+<div class="container uk-container uk-margin-auto mt-4 mb-4" style="width: 850px">
     <form method="post" novalidate>
 		<?php echo $renderForm; ?>
         <div class="row">

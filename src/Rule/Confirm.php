@@ -17,13 +17,13 @@ class Confirm extends Rule
 	{
 		if ($this->parseParams($field))
 		{
-			$value = $this->field->getValue();
-
 			if ($this->isValid)
 			{
 				// Only validate this when $this->when == $value
 				return true;
 			}
+
+			$value = $this->field->getValue();
 
 			switch ($this->op)
 			{
@@ -65,24 +65,15 @@ class Confirm extends Rule
 	{
 		if (isset($this->params[0]))
 		{
-			if (isset($this->params[1]))
+			if (!($form = $field->getForm()) || !($this->field = $form->getField($this->params[0])))
 			{
-				if (!$form = $field->getForm())
-				{
-					return false;
-				}
-				
-				$this->field = $form->getField($this->params[0]);
-				$this->value = $this->params[1];
-			}
-			else
-			{
-				$this->field = $field;
-				$this->value = $this->params[0];
+				return false;
 			}
 
-			if ($this->field)
+			if (isset($this->params[1]))
 			{
+				$this->value = $this->params[1];
+
 				if (preg_match('/^(in|!in|!)?\s*\[(.+)\]$/i', $this->value, $matches))
 				{
 					$this->op    = $matches[1] ?: '==';
@@ -93,7 +84,14 @@ class Confirm extends Rule
 					$this->op    = $matches[1] ?: '==';
 					$this->value = $matches[2];
 				}
+			}
+			else
+			{
+				$this->value = $field->getValue();
+			}
 
+			if (is_string($this->value))
+			{
 				$whenRegex = '/\[when:(.*)\]$/i';
 
 				if (preg_match($whenRegex, $this->value, $matches))
@@ -102,9 +100,9 @@ class Confirm extends Rule
 				}
 
 				$this->value = preg_replace($whenRegex, '', $this->value);
-
-				return true;
 			}
+
+			return true;
 		}
 
 		return false;
