@@ -249,8 +249,47 @@ $form = new Form(
 * Password
 * Radio
 * Select
+* SubForm
 * Text
 * TextArea
+
+## SubForm field
+Display a group fields width in the grid columns layout
+
+``` php
+
+    use MaiVu\Php\Form\Form;
+    
+    $form = new Form(
+        [
+            [
+                'name'        => 'subform',
+            	'type'        => 'SubForm',
+                'label'       => 'Subform',
+                'description' => 'This is a subform',
+                'columns'     => 2,
+                'horizontal'  => false,
+                'fields'      => [
+                    [
+            		    'name'  => 'firstName',
+            		    'type'  => 'Text',
+            		    'class' => 'form-control',
+            		    'hint'  => 'First name',
+            	    ],
+            	    [
+            		    'name'  => 'lastName',
+            		    'type'  => 'Text',
+            		    'class' => 'form-control',
+            		    'hint'  => 'Last name',
+                    ],
+                ]
+           ],
+       ]
+    );    
+
+```
+
+
 
 ## Show on feature
 Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
