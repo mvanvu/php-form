@@ -58,8 +58,7 @@ window.addEventListener('load', function () {
                             var o = showOnData[i].value.substring(0, 2);
 
                             if ('>=' === o || '<=' === o) {
-                                if (!multiple)
-                                {
+                                if (!multiple) {
                                     condValues = condValues.length ? condValues[0] : '';
                                 }
 
@@ -77,8 +76,7 @@ window.addEventListener('load', function () {
                                     values = showOnData[i].value.split(',');
                                 }
 
-                                if (multiple)
-                                {
+                                if (multiple) {
                                     values = JSON.stringify(values);
                                     condValues = JSON.stringify(condValues);
                                     willShow = ('!' === first && condValues !== values) || ('!' !== first && condValues === values);
@@ -97,11 +95,17 @@ window.addEventListener('load', function () {
                 willShow ? window.jQuery(field).slideDown() : window.jQuery(field).slideUp();
             } else {
                 if (willShow) {
-                    field.removeAttribute('hidden');
-                    field.classList.add('on-shown');
+                    field.style.display = field.dataset.originDisplay;
+                    setTimeout(function () {
+                        field.style.height = field.dataset.originHeight;
+                        field.classList.add('on-shown');
+                    }, 1);
                 } else {
-                    field.setAttribute('hidden', '');
+                    field.style.height = '0px';
                     field.classList.remove('on-shown');
+                    setTimeout(function () {
+                        field.style.display = 'none';
+                    }, 1);
                 }
             }
 
@@ -116,6 +120,17 @@ window.addEventListener('load', function () {
 
             if (fields.length) {
                 fields.forEach(function (field) {
+                    if (!window.jQuery && !field.dataset.originHeight) {
+                        var compStyles = window.getComputedStyle(field);
+                        field.dataset.originHeight = compStyles.height;
+                        field.dataset.originDisplay = compStyles.display;
+                        field.style['-webkit-transition'] = 'all .35s ease-in-out';
+                        field.style['-moz-transition'] = 'all .35s ease-in-out';
+                        field.style['-o-transition'] = 'all .35s ease-in-out';
+                        field.style['transition'] = 'all .35s ease-in-out';
+                        field.style['overflow'] = 'all';
+                    }
+
                     fireShowOn(field);
                 });
             }

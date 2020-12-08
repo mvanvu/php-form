@@ -207,7 +207,7 @@ $form = new Form(
 			'filters'     => ['basicHtml'],
 			'required'    => true,
 			'translate'   => true,
-			//'showOn'      => 'check:Y & pass1:!',
+			'showOn'      => 'check:Y',
 			'rules'       => [
 				'MinLength:5'          => 'Min length is 5',
 				'MaxLength:15'         => 'Max length is 15',
@@ -282,7 +282,7 @@ Assets::addFile('https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/css/uikit.min.css
 Assets::addFile('https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/js/uikit.min.js');*/
 
 // Optional Using JQuery to get a smooth show-on
-Assets::addFile('https://code.jquery.com/jquery-3.5.1.min.js');
+// Assets::addFile('https://code.jquery.com/jquery-3.5.1.min.js');
 
 $renderForm = $form->renderHorizontal();
 Assets::compress();
