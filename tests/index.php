@@ -64,7 +64,7 @@ $form = new Form(
 			'inline'      => true,
 			'class'       => 'uk-radio',
 			'description' => 'This is a radio field',
-			'showOn'      => 'checkList:Check 1,Check 3',
+			'showOn'      => 'checkList:Check 1,Check 3 & switcher:YES',
 			'options'     => [
 				[
 					'value'    => 'Check 1',
