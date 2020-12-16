@@ -2,10 +2,11 @@
 
 namespace MaiVu\Php\Form;
 
+use ArrayAccess;
 use Closure;
 use MaiVu\Php\Registry;
 
-class Form
+class Form implements ArrayAccess
 {
 	protected static $fieldTranslator = null;
 	protected static $options = [
@@ -243,11 +244,6 @@ class Form
 		return $this->renderFields($options);
 	}
 
-	public function has($fieldName)
-	{
-		return isset($this->fields[$fieldName]);
-	}
-
 	public function count()
 	{
 		return count($this->fields);
@@ -434,11 +430,51 @@ class Form
 		}
 	}
 
+	public function offsetExists($offset)
+	{
+		return $this->has($offset);
+	}
+
+	public function has($fieldName)
+	{
+		return isset($this->fields[$fieldName]);
+	}
+
+	public function offsetUnset($offset)
+	{
+		return $this->remove($offset);
+	}
+
 	public function remove($fieldName)
 	{
 		if (isset($this->fields[$fieldName]))
 		{
 			unset($this->fields[$fieldName]);
+		}
+
+		return $this;
+	}
+
+	public function __get($name)
+	{
+		return $this->offsetGet($name);
+	}
+
+	public function __set($name, $value)
+	{
+		return $this->offsetSet($name, $value);
+	}
+
+	public function offsetGet($offset)
+	{
+		return $this->getField($offset);
+	}
+
+	public function offsetSet($offset, $value)
+	{
+		if ($value instanceof Field)
+		{
+			$this->fields[$offset] = $value;
 		}
 
 		return $this;

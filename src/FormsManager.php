@@ -2,9 +2,10 @@
 
 namespace MaiVu\Php\Form;
 
+use ArrayAccess;
 use MaiVu\Php\Registry;
 
-class FormsManager
+class FormsManager implements ArrayAccess
 {
 	protected $forms = [];
 	protected $messages = [];
@@ -44,21 +45,9 @@ class FormsManager
 		return $this;
 	}
 
-	public function has($name)
-	{
-		return array_key_exists($name, $this->forms);
-	}
-
 	public function getForms()
 	{
 		return $this->forms;
-	}
-
-	public function remove($name)
-	{
-		unset($this->forms[$name]);
-
-		return $this;
 	}
 
 	public function count()
@@ -142,5 +131,52 @@ class FormsManager
 	public function getData($asArray = false)
 	{
 		return $asArray ? $this->data->toArray() : $this->data;
+	}
+
+	public function offsetExists($offset)
+	{
+		return $this->has($offset);
+	}
+
+	public function has($name)
+	{
+		return array_key_exists($name, $this->forms);
+	}
+
+	public function offsetUnset($offset)
+	{
+		return $this->remove($offset);
+	}
+
+	public function remove($name)
+	{
+		unset($this->forms[$name]);
+
+		return $this;
+	}
+
+	public function __get($name)
+	{
+		return $this->offsetGet($name);
+	}
+
+	public function __set($name, $value)
+	{
+		return $this->offsetSet($name, $value);
+	}
+
+	public function offsetGet($offset)
+	{
+		return $this->get($offset);
+	}
+
+	public function offsetSet($offset, $value)
+	{
+		if ($value instanceof Form)
+		{
+			$this->forms[$offset] = $value;
+		}
+
+		return $this;
 	}
 }
