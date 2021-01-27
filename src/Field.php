@@ -4,7 +4,6 @@ namespace MaiVu\Php\Form;
 
 use ArrayAccess;
 use Closure;
-use MaiVu\Php\Assets;
 use MaiVu\Php\Filter;
 use MaiVu\Php\Registry;
 
@@ -124,6 +123,11 @@ abstract class Field implements ArrayAccess
 		return $this;
 	}
 
+	public static function create($config, Form $form = null): Field
+	{
+		return new static($config, $form);
+	}
+
 	public function setTranslate($value)
 	{
 		if (is_array($value))
@@ -214,7 +218,9 @@ abstract class Field implements ArrayAccess
 
 		if (false === strpos($rule, '\\'))
 		{
-			foreach (Form::getOptions()['ruleNamespaces'] as $namespace)
+			$namespaces = array_merge([Rule::class], Form::getOptions()['ruleNamespaces']);
+
+			foreach ($namespaces as $namespace)
 			{
 				if (class_exists($namespace . '\\' . $rule))
 				{
@@ -405,16 +411,17 @@ abstract class Field implements ArrayAccess
 	public function render($options = [])
 	{
 		static $paths = [];
-		$options   = Form::getOptions($options);
-		$template  = $options['template'];
-		$languages = $options['languages'];
+		$options       = Form::getOptions($options);
+		$template      = $options['template'];
+		$languages     = $options['languages'];
+		$templatePaths = array_merge([__DIR__ . '/tmpl'], $options['templatePaths']);
 
 		if (!isset($paths[$template]))
 		{
 			// Default template is Bootstrap v4
 			$paths[$template] = __DIR__ . '/tmpl/bootstrap';
 
-			foreach ($options['templatePaths'] as $path)
+			foreach ($templatePaths as $path)
 			{
 				$path .= '/' . $template . '/renderField.php';
 
@@ -433,13 +440,6 @@ abstract class Field implements ArrayAccess
 
 		if ($translates = $this->getTranslateFields())
 		{
-			Assets::addFiles(
-				[
-					__DIR__ . '/../assets/css/i18n.css',
-					__DIR__ . '/../assets/js/i18n.js',
-				]
-			);
-
 			$tabTitles   = ['<li class="active"><a href="#' . $id . '-tab">' . $this->convertLanguageToFlag(array_keys($languages)[0]) . '</a></li>'];
 			$tabContents = ['<li class="active" id="' . $id . '-tab">' . $this->input . '</li>'];
 			array_shift($languages);
@@ -534,6 +534,11 @@ abstract class Field implements ArrayAccess
 							'language'       => $language,
 						]
 					);
+
+					if (isset($configData['id']))
+					{
+						$configData['id'] = $language . '-' . $configData['id'];
+					}
 
 					unset($configData['translate']);
 					$this->translateFields[$code2] = new static($configData, $this->form ? clone $this->form : null);
@@ -657,11 +662,6 @@ abstract class Field implements ArrayAccess
 			{
 				$op = '';
 			}
-		}
-
-		if ($showOnData)
-		{
-			Assets::addFile(dirname(__DIR__) . '/assets/js/show-on.js');
 		}
 
 		return $showOnData;

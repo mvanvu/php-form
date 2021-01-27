@@ -10,9 +10,9 @@ class Form implements ArrayAccess
 {
 	protected static $fieldTranslator = null;
 	protected static $options = [
-		'fieldNamespaces' => [Field::class],
-		'ruleNamespaces'  => [Rule::class],
-		'templatePaths'   => [__DIR__ . '/tmpl'],
+		'fieldNamespaces' => [],
+		'ruleNamespaces'  => [],
+		'templatePaths'   => [],
 		'template'        => 'bootstrap',
 		'layout'          => 'vertical',
 		'messages'        => [
@@ -29,6 +29,8 @@ class Form implements ArrayAccess
 	protected $name;
 
 	protected $data;
+
+	protected $i18n;
 
 	protected $fields = [];
 
@@ -54,7 +56,8 @@ class Form implements ArrayAccess
 		}
 
 		$this->setName($name);
-		$this->data = new Registry;
+		$this->data = Registry::create();
+		$this->i18n = Registry::create();
 
 		if ($data)
 		{
@@ -80,7 +83,9 @@ class Form implements ArrayAccess
 
 			if (false === strpos($config['type'], '\\'))
 			{
-				foreach (static::$options['fieldNamespaces'] as $namespace)
+				$namespaces = array_merge([Field::class], static::$options['fieldNamespaces']);
+
+				foreach ($namespaces as $namespace)
 				{
 					if (class_exists($namespace . '\\' . $config['type']))
 					{
@@ -118,22 +123,73 @@ class Form implements ArrayAccess
 
 	public static function addFieldNamespaces($namespaces)
 	{
-		static::setOptions(['fieldNamespaces' => (array) $namespaces]);
+		static::$options['fieldNamespaces'] = array_merge(static::$options['fieldNamespaces'], (array) $namespaces);
 	}
 
 	public static function addRuleNamespaces($namespaces)
 	{
-		static::setOptions(['ruleNamespaces' => (array) $namespaces]);
+		static::$options['ruleNamespaces'] = array_merge(static::$options['ruleNamespaces'], (array) $namespaces);
 	}
 
 	public static function addTemplatePaths($paths)
 	{
-		static::setOptions(['templatePaths' => (array) $paths]);
+		static::$options['templatePaths'] = array_merge(static::$options['templatePaths'], (array) $paths);
 	}
 
 	public static function setTemplate($template, $layout = 'vertical')
 	{
-		static::setOptions(['template' => $template, 'layout' => $layout]);
+		static::$options['template'] = $template;
+		static::$options['layout']   = $layout;
+	}
+
+	public static function clearSessionMessages()
+	{
+		Registry::session()->remove('phpFormFieldMessage');
+	}
+
+	public static function getOptions(array $extendsOptions = [])
+	{
+		if ($extendsOptions)
+		{
+			return static::extendsOptions($extendsOptions);
+		}
+
+		return static::$options;
+	}
+
+	public static function setOptions(array $options)
+	{
+		static::$options = static::extendsOptions($options);
+	}
+
+	public static function extendsOptions(array $options)
+	{
+		$result = static::$options;
+
+		foreach ($options as $name => $value)
+		{
+			if (isset($result[$name]) && gettype($value) === gettype($result[$name]))
+			{
+				if (is_array($value))
+				{
+					$result[$name] = array_merge($result[$name], $value);
+				}
+				else
+				{
+					$result[$name] = $value;
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	public static function setOption(string $key, $value)
+	{
+		if (array_key_exists($key, static::$options))
+		{
+			static::$options[$key] = $value;
+		}
 	}
 
 	public function reset()
@@ -264,14 +320,14 @@ class Form implements ArrayAccess
 		return $this->isValid($_REQUEST);
 	}
 
-	public function isValid($bindData = null, $checkFormName = true)
+	public function isValid($bindData = null)
 	{
 		$this->messages = [];
 		$isValid        = true;
 
 		if (null !== $bindData)
 		{
-			$this->bind($bindData, $checkFormName);
+			$this->bind($bindData);
 		}
 
 		if ($this->beforeValidation)
@@ -289,88 +345,97 @@ class Form implements ArrayAccess
 		return $isValid;
 	}
 
-	public function bind($data, $checkFormName = true)
+	public function bind($data): Registry
 	{
-		$languages    = static::getOptions()['languages'];
-		$registry     = new Registry($data);
-		$filteredData = new Registry;
-		$name         = $this->getName();
+		$data        = Registry::create($data);
+		$filtered    = Registry::create();
+		$i18n        = Registry::create();
+		$i18nPathGet = '';
+		$i18nPathSet = '';
 
-		if ($checkFormName && $name)
+		if ($this->name)
 		{
-			$registry = new Registry($registry->get($name, []));
+			if (strpos($this->name, '.'))
+			{
+				list($rootPath, $i18nPathGet) = explode('.', $this->name, 2);
+				$i18n->setData($data->get($rootPath . '.i18n', []));
+				$i18nPathGet .= '.';
+			}
+			else
+			{
+				$i18n->setData($data->get($this->name . '.i18n', []));
+			}
+
+			$data->setData($data->get($this->name, []));
+			$i18nPathSet = $this->name . '.';
 		}
-
-		if (count($languages) > 1)
+		else
 		{
-			array_shift($languages);
+			$i18n->setData($data->get('i18n', []));
 		}
 
 		foreach ($this->fields as $field)
 		{
 			$fieldName = $field->getName(true);
-			$filteredData->set($fieldName, $field->applyFilters($registry->get($fieldName, null)));
+
+			if ($data->has($fieldName))
+			{
+				$filtered->set($fieldName, $field->applyFilters($data->get($fieldName)));
+			}
+			elseif (!$this->data->has($fieldName))
+			{
+				$this->data->set($fieldName, $field->applyFilters());
+			}
 
 			if ($translateFields = $field->getTranslateFields())
 			{
+				$fieldValue = $field->getValue();
+
 				foreach ($translateFields as $translateField)
 				{
-					$path = 'i18n.' . $translateField->get('language') . '.' . $fieldName;
-					$filteredData->set($path, $translateField->applyFilters($registry->get($path, null)));
-				}
-			}
-		}
+					$language = $translateField->get('language');
+					$pathGet  = $language . '.' . $i18nPathGet . $fieldName;
+					$pathSet  = $language . '.' . $i18nPathSet . $fieldName;
 
-		$this->data->merge($filteredData);
-
-		return $filteredData;
-	}
-
-	public static function getOptions(array $extendsOptions = [])
-	{
-		if ($extendsOptions)
-		{
-			return static::extendsOptions($extendsOptions);
-		}
-
-		return static::$options;
-	}
-
-	public static function setOptions(array $options)
-	{
-		static::$options = static::extendsOptions($options);
-	}
-
-	public static function extendsOptions(array $options)
-	{
-		$result = static::$options;
-
-		foreach ($options as $name => $value)
-		{
-			if (isset($result[$name]) && gettype($value) === gettype($result[$name]))
-			{
-				if (is_array($value))
-				{
-					foreach (array_reverse($value) as $k => $v)
+					if ($i18n->has($pathGet))
 					{
-						if (is_integer($k))
+						$translatedValue = $translateField->applyFilters($i18n->get($pathGet));
+
+						if ('' !== $translatedValue && $fieldValue != $translatedValue)
 						{
-							array_unshift($result[$name], $v);
-						}
-						else
-						{
-							$result[$name][$k] = $v;
+							$this->i18n->set($pathSet, $translatedValue);
 						}
 					}
 				}
-				else
-				{
-					$result[$name] = $value;
-				}
 			}
 		}
 
-		return $result;
+		$this->data->merge($filtered);
+
+		return $filtered;
+	}
+
+	protected function validateFields($fields, &$isValid)
+	{
+		/** @var Field $field */
+		foreach ($fields as $field)
+		{
+			if (!$field->isValid())
+			{
+				$isValid        = false;
+				$this->messages = array_merge($this->messages, $field->getErrorMessages(false));
+			}
+
+			if ($translateFields = $field->getTranslateFields())
+			{
+				$this->validateFields($translateFields, $isValid);
+			}
+		}
+	}
+
+	public function getI18nData($asArray = false)
+	{
+		return $asArray ? $this->i18n->toArray() : $this->i18n;
 	}
 
 	public function getName()
@@ -380,6 +445,8 @@ class Form implements ArrayAccess
 
 	public function setName(string $name)
 	{
+		$name = trim($name, '.');
+
 		if (strpos($name, '.'))
 		{
 			$parts  = explode('.', $name);
@@ -405,29 +472,6 @@ class Form implements ArrayAccess
 		}
 
 		$this->name = $name;
-	}
-
-	protected function validateFields($fields, &$isValid)
-	{
-		/** @var Field $field */
-		foreach ($fields as $field)
-		{
-			if ($field->isValid())
-			{
-				// Update field data
-				$this->data->set($field->getName(true), $field->getValue());
-			}
-			else
-			{
-				$isValid        = false;
-				$this->messages = array_merge($this->messages, $field->getErrorMessages(false));
-			}
-
-			if ($translateFields = $field->getTranslateFields())
-			{
-				$this->validateFields($translateFields, $isValid);
-			}
-		}
 	}
 
 	public function offsetExists($offset)

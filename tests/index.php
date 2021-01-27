@@ -5,13 +5,11 @@ error_reporting(E_ALL);
 
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
-use MaiVu\Php\Assets;
 use MaiVu\Php\Form\Field\Check;
 use MaiVu\Php\Form\Form;
 use MaiVu\Php\Registry;
 
 Registry::session()->start();
-
 $form = new Form(
 	[
 		[
@@ -273,20 +271,6 @@ if ('POST' === $_SERVER['REQUEST_METHOD'])
 	$form->isValidRequest();
 }
 
-Assets::setDebugMode(true);
-Assets::addFile('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css');
-
-/*// UIkit 3
-Form::setTemplate('uikit-3');
-Assets::addFile('https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/css/uikit.min.css');
-Assets::addFile('https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/js/uikit.min.js');*/
-
-// Optional Using JQuery to get a smooth show-on
-// Assets::addFile('https://code.jquery.com/jquery-3.5.1.min.js');
-
-$renderForm = $form->renderHorizontal();
-Assets::compress();
-
 ?>
 
 <!DOCTYPE html>
@@ -294,12 +278,14 @@ Assets::compress();
 <head>
     <meta charset="UTF-8">
     <title>Php Form Sample</title>
-	<?php echo Assets::output('css'); ?>
+    <link type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          rel="stylesheet"/>
+    <link type="text/css" href="../assets/css/php-form.min.css" rel="stylesheet"/>
 </head>
 <body>
 <div class="container uk-container uk-margin-auto mt-4 mb-4" style="width: 850px">
     <form method="post" novalidate>
-		<?php echo $renderForm; ?>
+		<?php echo $form->renderHorizontal(); ?>
         <div class="row">
             <div class="offset-sm-2 col-sm-10">
                 <button class="btn btn-primary" type="submit">
@@ -309,7 +295,6 @@ Assets::compress();
         </div>
     </form>
 </div>
-
-<?php echo Assets::output('js'); ?>
+<script src="../assets/js/php-form.min.js"></script>
 </body>
 </html>

@@ -175,7 +175,7 @@ echo $form->getField('text');
 // <input name="myForm[params][text]" type="text" value="The text value"/>
 ```
 
-## Translate the field (for multilingual purpose, include i18n.css & i18n.js)
+## Translate the field (for multilingual purpose, include php-form.min.css & php-form.min.js)
 ``` php
 use MaiVu\Php\Form\Form;
 
@@ -240,7 +240,7 @@ $form = new Form(
 
 ## Default fields see at path src/Field
 
-* Switcher (must include assets/css/switcher.css if you don't use the php-assets)
+* Switcher (must include assets/css/php-form.min.css if you don't use the php-assets)
 * Check
 * CheckList
 * Email
@@ -324,12 +324,7 @@ Show or hide the base field in the conditions (UI likes the Joomla! CMS Form)
         ]
     );
 
-    // Before render field we must include assets/js/show-on.js
-    // OR render before HTML </body> closed tag by using php-assets
-    // use MaiVu\Php\Assets;
-    // Assets::compress();
-    // echo Assets::output('js');
-
+    // Before render field we must include assets/js/php-form.min.js
     echo $form->renderFields();
 
 ```

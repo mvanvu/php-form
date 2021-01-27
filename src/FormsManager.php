@@ -8,12 +8,17 @@ use MaiVu\Php\Registry;
 class FormsManager implements ArrayAccess
 {
 	protected $forms = [];
+
 	protected $messages = [];
+
 	protected $data;
+
+	protected $i18n;
 
 	public function __construct(array $forms = [])
 	{
-		$this->data = new Registry;
+		$this->data = Registry::create();
+		$this->i18n = Registry::create();
 
 		if ($forms)
 		{
@@ -45,6 +50,11 @@ class FormsManager implements ArrayAccess
 		return $this;
 	}
 
+	public static function create(array $forms = [])
+	{
+		return new FormsManager($forms);
+	}
+
 	public function getForms()
 	{
 		return $this->forms;
@@ -65,11 +75,11 @@ class FormsManager implements ArrayAccess
 		return $this->isValid($_REQUEST);
 	}
 
-	public function isValid($bindData = null, $checkFormName = true): bool
+	public function isValid($bindData = null): bool
 	{
 		if (null !== $bindData)
 		{
-			$this->bind($bindData, $checkFormName);
+			$this->bind($bindData);
 		}
 
 		$isValid        = true;
@@ -87,15 +97,24 @@ class FormsManager implements ArrayAccess
 		return $isValid;
 	}
 
-	public function bind($data, $checkFormName = true): array
+	public function bind($data): Registry
 	{
 		foreach ($this->forms as $form)
 		{
-			$formData = $form->bind($data, $checkFormName);
+			$form->bind($data);
+			$formData = $form->getData(true);
+			$this->i18n->merge($form->getI18nData(true), true);
 
 			if ($name = $form->getName())
 			{
-				$this->data->set($name, $formData);
+				if ($this->data->has($name))
+				{
+					$this->data->set($name, array_merge((array) $this->data->get($name), $formData));
+				}
+				else
+				{
+					$this->data->set($name, $formData);
+				}
 			}
 			else
 			{
@@ -103,7 +122,12 @@ class FormsManager implements ArrayAccess
 			}
 		}
 
-		return $this->data->toArray();
+		return $this->data;
+	}
+
+	public function getI18nData($asArray = false)
+	{
+		return $asArray ? $this->i18n->toArray() : $this->i18n;
 	}
 
 	public function renderHorizontal($name, array $options = [])

@@ -45,4 +45,5 @@ else
             </div>
 		<?php endif; ?>
     </div>
+    <div class="uk-clearfix"></div>
 </div>

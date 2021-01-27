@@ -53,8 +53,14 @@ class Select extends OptionsBase
 				{
 					$optValue = (string) ($opt['value'] ?? '');
 					$optText  = (string) ($opt['text'] ?? '');
-					$selected = in_array($optValue, $valueArray) ? ' selected' : '';
-					$input    .= '<option value="' . $this->renderValue($optValue) . '"' . $selected . '>' . $this->renderText($optText) . '</option>';
+					$attr     = in_array($optValue, $valueArray) ? ' selected' : '';
+
+					if (!empty($opt['disabled']))
+					{
+						$attr .= ' disabled';
+					}
+
+					$input .= '<option value="' . $this->renderValue($optValue) . '"' . $attr . '>' . $this->renderText($optText) . '</option>';
 				}
 
 				$input .= '</optgroup>';
@@ -62,8 +68,14 @@ class Select extends OptionsBase
 			else
 			{
 				$optValue = (string) ($options['value'] ?? '');
-				$selected = in_array($optValue, $valueArray) ? ' selected' : '';
-				$input    .= '<option value="' . $this->renderValue($optValue) . '"' . $selected . '>' . $this->renderText(($options['text'] ?? '')) . '</option>';
+				$attr     = in_array($optValue, $valueArray) ? ' selected' : '';
+
+				if (!empty($options['disabled']))
+				{
+					$attr .= ' disabled';
+				}
+
+				$input .= '<option value="' . $this->renderValue($optValue) . '"' . $attr . '>' . $this->renderText(($options['text'] ?? '')) . '</option>';
 			}
 		}
 
