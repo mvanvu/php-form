@@ -11,7 +11,6 @@ Manage the form fields in easy way, security and cool.
 
 
 ## Included dependencies
-* Php-assets (see https://github.com/mvanvu/php-assets)
 * Php-registry (see https://github.com/mvanvu/php-registry)
 * Php-filters (see https://github.com/mvanvu/php-filter)
 
