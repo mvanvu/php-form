@@ -17,14 +17,14 @@ class SubForm extends Field
 		$form    = $this->getSubForm();
 		$columns = (int) $this->columns;
 
-		if (!in_array($columns, [1, 2, 3, 4]))
+		if (!in_array($columns, [1, 2, 3, 4, 6]))
 		{
 			$columns = 1;
 		}
 
 		if (!empty($this->value))
 		{
-			$form->bind($this->value, false);
+			$form->bind($this->value);
 		}
 
 		return '<div class="' . rtrim('subform-field-body ' . $this->class) . '" '
@@ -44,7 +44,7 @@ class SubForm extends Field
 		if (null === $this->subForm)
 		{
 			$formName      = trim(($this->form ? $this->form->getName() . '.' : '') . $this->name, '.');
-			$this->subForm = new Form($formName, $this->fields);
+			$this->subForm = Form::create($formName, $this->fields);
 		}
 
 		return $this->subForm;
@@ -52,6 +52,6 @@ class SubForm extends Field
 
 	public function isValid()
 	{
-		return $this->getSubForm()->isValid($this->value, false);
+		return $this->getSubForm()->isValid($this->value);
 	}
 }

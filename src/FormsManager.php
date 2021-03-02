@@ -7,6 +7,9 @@ use MaiVu\Php\Registry;
 
 class FormsManager implements ArrayAccess
 {
+	/**
+	 * @var Form[]
+	 */
 	protected $forms = [];
 
 	protected $messages = [];
@@ -150,6 +153,18 @@ class FormsManager implements ArrayAccess
 	public function get($name): ?Form
 	{
 		return $this->forms[$name] ?? null;
+	}
+
+	public function renderForms(array $options = [])
+	{
+		$results = [];
+
+		foreach ($this->forms as $form)
+		{
+			$results[] = $form->renderFields($options);
+		}
+
+		return implode(PHP_EOL, $results);
 	}
 
 	public function getData($asArray = false)

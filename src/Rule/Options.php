@@ -9,13 +9,9 @@ class Options extends Rule
 {
 	public function validate(Field $field): bool
 	{
-		if (!($options = $field->get('options', [])))
-		{
-			return false;
-		}
-
 		$optionValues = [];
 		$value        = $field->getValue();
+		$options      = $field->get('options', []);
 
 		foreach ($options as $option)
 		{
@@ -30,6 +26,11 @@ class Options extends Rule
 			{
 				$optionValues[] = $option['value'] ?? null;
 			}
+		}
+
+		if (null === $value && empty($optionValues))
+		{
+			return true;
 		}
 
 		if (is_array($value))
