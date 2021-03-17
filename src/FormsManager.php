@@ -155,18 +155,6 @@ class FormsManager implements ArrayAccess
 		return $this->forms[$name] ?? null;
 	}
 
-	public function renderForms(array $options = [])
-	{
-		$results = [];
-
-		foreach ($this->forms as $form)
-		{
-			$results[] = $form->renderFields($options);
-		}
-
-		return implode(PHP_EOL, $results);
-	}
-
 	public function getData($asArray = false)
 	{
 		return $asArray ? $this->data->toArray() : $this->data;
@@ -217,5 +205,22 @@ class FormsManager implements ArrayAccess
 		}
 
 		return $this;
+	}
+
+	public function __toString()
+	{
+		return $this->renderForms();
+	}
+
+	public function renderForms(array $options = []): string
+	{
+		$results = [];
+
+		foreach ($this->forms as $form)
+		{
+			$results[] = $form->renderFields($options);
+		}
+
+		return implode(PHP_EOL, $results);
 	}
 }

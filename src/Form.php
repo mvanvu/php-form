@@ -245,7 +245,7 @@ class Form implements ArrayAccess
 		return $this->renderFields(['layout' => 'horizontal']);
 	}
 
-	public function renderFields(array $options = [])
+	public function renderFields(array $options = []): string
 	{
 		$results = [];
 
@@ -522,5 +522,10 @@ class Form implements ArrayAccess
 		}
 
 		return $this;
+	}
+
+	public function __toString()
+	{
+		return $this->renderFields();
 	}
 }
