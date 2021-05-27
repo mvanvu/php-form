@@ -21,7 +21,12 @@ class MinLength extends Rule
 				return is_array($value) && count($value) >= $length;
 			}
 
-			return (is_string($value) || is_numeric($value)) && strlen((string) $value) >= $length;
+			if (is_numeric($value))
+			{
+				return (int) $value >= $length;
+			}
+
+			return is_string($value) && strlen((string) $value) >= $length;
 		}
 
 		return false;
